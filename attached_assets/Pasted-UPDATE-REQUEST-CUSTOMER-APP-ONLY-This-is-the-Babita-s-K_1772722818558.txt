@@ -1,0 +1,168 @@
+UPDATE REQUEST – CUSTOMER APP ONLY
+
+This is the Babita’s Kitchen Customer App.
+
+Do NOT rebuild the entire project.
+
+Only modify and improve the following areas carefully without breaking existing UI or features.
+
+1️⃣ AUTHENTICATION – PRODUCTION READY
+
+Replace current authentication with Supabase Auth.
+
+Requirements:
+
+• Email + Password Signup
+• Email + Password Login
+• Secure session handling
+• Persistent login
+• Logout
+• Password reset
+
+After login:
+Redirect user to /home.
+
+If not logged in:
+Redirect all protected routes to /login.
+
+Use proper protected route middleware.
+
+Do NOT allow unauthenticated access to:
+
+Cart
+
+Checkout
+
+Profile
+
+Orders
+
+Keep authentication clean and secure.
+
+2️⃣ LOCATION ACCESS (VERY IMPORTANT)
+
+Add automatic location detection on first login.
+
+Features:
+
+• Ask browser location permission
+• Detect user’s current latitude & longitude
+• Convert to readable address (use Google Maps Geocoding API)
+• Auto-fill delivery address
+• Allow user to edit manually
+
+Store location in database under:
+
+user_addresses table:
+
+id
+
+user_id
+
+latitude
+
+longitude
+
+full_address
+
+is_default
+
+If location permission denied:
+Allow manual address entry.
+
+Show small location indicator in navbar:
+📍 Delivering to: [Area Name]
+
+3️⃣ LOGO FIX (CRITICAL DESIGN FIX)
+
+Fix the logo across the app.
+
+Current problems:
+
+Too small
+
+Has background
+
+Not premium
+
+Changes required:
+
+• Use transparent PNG logo
+• Increase navbar logo width to 140px
+• Remove background container
+• Add subtle drop shadow
+• Add proper padding
+• Keep clean minimal spacing
+
+On Home Page:
+
+Add a hero section:
+
+Centered large logo (200px width)
+Below it:
+“Fresh. Organic. Homemade.”
+Small tagline text.
+
+Keep it elegant, minimal, not loud.
+
+4️⃣ LOGIN PAGE DESIGN IMPROVEMENT
+
+Redesign login page:
+
+Minimal centered card layout
+Cream background
+Sage green primary button
+Soft shadow
+Rounded corners (20px)
+
+Add:
+
+Email input
+
+Password input
+
+Login button
+
+Signup link
+
+Forgot password link
+
+Add smooth fade-in animation.
+
+Make it feel premium and calm.
+
+5️⃣ SESSION MANAGEMENT
+
+Ensure:
+
+• User stays logged in on refresh
+• Supabase session restored properly
+• Auto redirect if already logged in
+
+6️⃣ CLEAN FOLDER STRUCTURE
+
+Organize project like:
+
+/app
+/login
+/signup
+/home
+/cart
+/checkout
+/profile
+/components
+/lib
+supabaseClient.ts
+/middleware
+
+Keep code clean and modular.
+
+7️⃣ DO NOT MODIFY
+
+• Existing product layout
+• Cart logic
+• Checkout flow
+• Theme colors
+• Overall UI style
+
+Only improve authentication, location, logo, and session logic.
