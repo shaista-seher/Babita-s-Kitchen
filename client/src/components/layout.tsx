@@ -1,40 +1,147 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/context/auth-context";
+import { useLocation as useUserLocation } from "@/context/location-context";
 import { useCart } from "@/context/cart-context";
-import { ShoppingBag, User as UserIcon, LogOut, Menu, UtensilsCrossed } from "lucide-react";
-import bkLogo from "@assets/BK_logo_1772721148069.jpeg";
+import { ShoppingBag, User as UserIcon, LogOut, Menu, MapPin, Loader2, Search, X } from "lucide-react";
+import bkLogo from "@assets/BK_logo_new.jpeg";
+import navbarBg from "@assets/navabar.jpeg";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
+  const { location, requestLocation, searchLocation, isLoading: locationLoading, clearLocation } = useUserLocation();
   const { totalItems } = useCart();
-  const [location] = useLocation();
+  const [locationPath] = useLocation();
+  const [showLocationSearch, setShowLocationSearch] = useState(false);
+  const [locationQuery, setLocationQuery] = useState("");
+
+  const handleLogout = async () => {
+    await signOut();
+    window.location.href = "/login";
+  };
+
+  const handleLocationSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (locationQuery.trim()) {
+      await searchLocation(locationQuery);
+      setShowLocationSearch(false);
+      setLocationQuery("");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-50 glass border-b-0 pb-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b-0 pb-0">
+        <div className="absolute inset-0 z-0">
+          <img src={navbarBg} alt="" className="w-full h-full object-cover" />
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
-              <img src={bkLogo} alt="Babita's Kitchen" className="w-full h-full object-cover" />
+            <img src={bkLogo} alt="Babita's Kitchen" className="w-20 h-20 object-contain rounded-full" />
+            <div className="flex flex-col">
+              <span className="font-serif text-lg font-bold leading-tight" style={{ color: '#8B5E3C' }}>Babita's</span>
+              <span className="font-serif text-lg font-bold leading-tight" style={{ color: '#7A9E7E' }}>Kitchen</span>
             </div>
-            <span className="font-display font-semibold text-xl tracking-tight text-secondary group-hover:text-primary transition-colors">
-              Babita's Kitchen
-            </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 font-medium text-secondary/80">
-            <Link href="/" className={`hover:text-primary transition-colors ${location === '/' ? 'text-primary font-semibold' : ''}`}>Menu</Link>
+          <nav className="hidden md:flex items-center gap-8 font-medium text-foreground/90">
+            <Link href="/" className={`hover:text-primary transition-colors ${locationPath === '/' || locationPath === '/home' ? 'text-primary font-semibold' : ''}`}>Menu</Link>
             <Link href="/" className="hover:text-primary transition-colors">Specials</Link>
             <Link href="/" className="hover:text-primary transition-colors">Our Story</Link>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <Link href="/cart" className="relative p-2 rounded-full hover:bg-secondary/5 transition-colors text-secondary">
+            {/* Location Indicator with Search */}
+            {isAuthenticated && (
+              <div className="relative">
+                <button 
+                  onClick={() => setShowLocationSearch(!showLocationSearch)}
+                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-sm hover:bg-primary/30 transition-colors"
+                >
+                  {locationLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <MapPin className="w-4 h-4" />
+                  )}
+                  {location ? (
+                    <span className="max-w-[150px] truncate">{location.areaName || 'Delivery set'}</span>
+                  ) : (
+                    <span>Set Location</span>
+                  )}
+                </button>
+
+                {/* Location Search Dropdown */}
+                {showLocationSearch && (
+                  <div className="absolute top-full mt-2 right-0 w-80 bg-white rounded-2xl shadow-xl border border-border p-4 z-50">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-sm text-foreground">Search Location</h4>
+                      <button 
+                        onClick={() => setShowLocationSearch(false)}
+                        className="p-1 hover:bg-secondary/10 rounded-full"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <form onSubmit={handleLocationSearch} className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input 
+                          type="text"
+                          placeholder="Enter your address..."
+                          value={locationQuery}
+                          onChange={(e) => setLocationQuery(e.target.value)}
+                          className="pl-9 h-10 rounded-xl"
+                        />
+                      </div>
+                      <Button 
+                        type="submit" 
+                        size="sm" 
+                        className="h-10 rounded-xl"
+                        disabled={locationLoading}
+                      >
+                        {locationLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
+                      </Button>
+                    </form>
+                    <div className="mt-3 pt-3 border-t border-border/50">
+                      <p className="text-xs text-muted-foreground mb-2">Or use your current location</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full rounded-xl gap-2"
+                        onClick={() => {
+                          requestLocation();
+                          setShowLocationSearch(false);
+                        }}
+                        disabled={locationLoading}
+                      >
+                        <MapPin className="w-4 h-4" />
+                        Use Current Location
+                      </Button>
+                    </div>
+                    {location && (
+                      <div className="mt-3 pt-3 border-t border-border/50">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Current: {location.areaName}</span>
+                          <button 
+                            onClick={() => clearLocation()}
+                            className="text-xs text-red-500 hover:text-red-600"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <Link href="/cart" className="relative p-2 rounded-full hover:bg-primary/10 transition-colors text-primary">
               <ShoppingBag className="w-6 h-6" />
               {totalItems > 0 && (
-                <span className="absolute top-1 right-1 w-5 h-5 bg-accent text-white text-[10px] font-bold flex items-center justify-center rounded-full shadow-sm">
+                <span className="absolute top-1 right-1 w-5 h-5 bg-[#E2725B] text-white text-[10px] font-bold flex items-center justify-center rounded-full shadow-sm">
                   {totalItems}
                 </span>
               )}
@@ -43,7 +150,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <Link href="/profile">
-                  <Button variant="ghost" className="rounded-full gap-2 text-secondary hover:text-primary hover:bg-primary/10">
+                  <Button variant="ghost" className="rounded-full gap-2 text-primary hover:bg-primary/10 hover:text-primary">
                     <UserIcon className="w-5 h-5" />
                     <span className="hidden sm:inline">Profile</span>
                   </Button>
@@ -51,20 +158,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  onClick={() => logout()} 
-                  className="rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  onClick={handleLogout} 
+                  className="rounded-full text-primary/80 hover:text-primary hover:bg-primary/10"
                   title="Logout"
                 >
                   <LogOut className="w-5 h-5" />
                 </Button>
               </div>
             ) : (
-              <Button asChild className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                <a href="/api/login">Sign In</a>
-              </Button>
+              <Link href="/login">
+                <Button className="rounded-full bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all font-medium">
+                  Sign In
+                </Button>
+              </Link>
             )}
             
-            <Button variant="ghost" size="icon" className="md:hidden text-secondary">
+            <Button variant="ghost" size="icon" className="md:hidden text-primary">
               <Menu className="w-6 h-6" />
             </Button>
           </div>
@@ -80,10 +189,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl overflow-hidden grayscale contrast-125">
+                <div className="w-12 h-12 rounded-full overflow-hidden shadow-md">
                   <img src={bkLogo} alt="Logo" className="w-full h-full object-cover" />
                 </div>
-                <span className="font-display font-semibold text-lg text-secondary">Babita's Kitchen</span>
+                <span className="font-semibold text-lg font-serif" style={{ color: '#8B5E3C' }}>Babita's</span>
+                <span className="font-semibold text-lg font-serif" style={{ color: '#7A9E7E' }}>Kitchen</span>
               </div>
               <p className="text-muted-foreground max-w-sm leading-relaxed">
                 True taste of home wherever you roam. We craft organic, wholesome, and delicious meals that nourish the soul.

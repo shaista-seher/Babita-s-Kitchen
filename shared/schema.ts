@@ -57,7 +57,22 @@ export const addresses = pgTable("addresses", {
   userId: text("user_id").notNull(),
   label: text("label").notNull(), // e.g., Home, Work
   address: text("address").notNull(),
+  latitude: numeric("latitude"),
+  longitude: numeric("longitude"),
   isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// New table for user addresses with location data
+export const userAddresses = pgTable("user_addresses", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  label: text("label").notNull(), // e.g., Home, Work
+  fullAddress: text("full_address").notNull(),
+  latitude: numeric("latitude"),
+  longitude: numeric("longitude"),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 
@@ -98,6 +113,7 @@ export const insertProductSchema = createInsertSchema(products).omit({ id: true,
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true, status: true, paymentStatus: true });
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true });
 export const insertAddressSchema = createInsertSchema(addresses).omit({ id: true });
+export const insertUserAddressSchema = createInsertSchema(userAddresses).omit({ id: true, createdAt: true });
 
 
 // === EXPLICIT API CONTRACT TYPES ===
@@ -113,6 +129,8 @@ export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type InsertAddress = z.infer<typeof insertAddressSchema>;
+export type UserAddress = typeof userAddresses.$inferSelect;
+export type InsertUserAddress = z.infer<typeof insertUserAddressSchema>;
 
 
 // Requests

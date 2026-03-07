@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useLocation as useWouterLocation } from "wouter";
 import { Layout } from "@/components/layout";
-import { useAuth } from "@/hooks/use-auth";
-import { useOrders, useAddresses, useCreateAddress } from "@/hooks/use-shop";
-import { Clock, MapPin, Package, Plus, Loader2 } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import { useOrders, useAddresses, useCreateAddress } from "@/hooks/use-supabase";
+import { useLocation, UserLocation } from "@/context/location-context";
+import { Clock, MapPin, Package, Plus, Loader2, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,21 +12,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { format } from "date-fns";
 
 export default function Profile() {
-  const { user, isAuthenticated } = useAuth();
-  const { data: orders, isLoading: loadingOrders } = useOrders();
-  const { data: addresses, isLoading: loadingAddresses } = useAddresses();
+  const { user, isAuthenticated, isLoading: authLoading, signOut } = useAuth();
+  const { data: orders, isLoading: loadingOrders } = useOrders(user?.id || "");
+  const { data: addresses, isLoading: loadingAddresses } = useAddresses(user?.id || "");
   const createAddress = useCreateAddress();
+  const { location, requestLocation, isLoading: locationLoading } = useLocation() as { location: UserLocation | null; requestLocation: () => void; isLoading: boolean };
+  const [, setLocation] = useWouterLocation();
   
   const [activeTab, setActiveTab] = useState<'orders'|'addresses'>('orders');
   const [isAddressOpen, setIsAddressOpen] = useState(false);
   const [newAddress, setNewAddress] = useState({ label: '', address: '' });
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || authLoading) {
     return (
       <Layout>
         <div className="flex-1 flex flex-col items-center justify-center py-20">
           <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
-          <p>Redirecting to login...</p>
+          <p>Loading...</p>
         </div>
       </Layout>
     );
@@ -32,7 +36,16 @@ export default function Profile() {
 
   const handleAddAddress = (e: React.FormEvent) => {
     e.preventDefault();
-    createAddress.mutate(newAddress, {
+    if (!user) return;
+    
+    createAddress.mutate({
+      userId: user.id,
+      label: newAddress.label,
+      address: newAddress.address,
+      latitude: location?.latitude,
+      longitude: location?.longitude,
+      isDefault: (addresses?.length || 0) === 0
+    }, {
       onSuccess: () => {
         setIsAddressOpen(false);
         setNewAddress({ label: '', address: '' });
@@ -179,18 +192,16 @@ export default function Profile() {
                   </Dialog>
                 </div>
 
-                {loadingAddresses ? (
-                  <div className="py-12 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-                ) : addresses && addresses.length > 0 ? (
+                {addresses && addresses.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {addresses.map(addr => (
+                    {addresses.map((addr: any) => (
                       <div key={addr.id} className="bg-white p-6 rounded-3xl border border-border/50 shadow-sm relative group">
                         <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-4">
                           <MapPin className="w-5 h-5" />
                         </div>
                         <h4 className="font-display font-semibold text-lg text-foreground mb-2">{addr.label}</h4>
-                        <p className="text-muted-foreground text-sm leading-relaxed">{addr.address}</p>
-                        {addr.isDefault && (
+                        <p className="text-muted-foreground text-sm leading-relaxed">{addr.full_address || addr.address}</p>
+                        {addr.is_default && (
                           <span className="absolute top-6 right-6 text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
                             Default
                           </span>

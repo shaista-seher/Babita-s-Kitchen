@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,6 +8,7 @@
   :root {
     --font-sans: 'Inter', sans-serif;
     --font-display: 'Poppins', sans-serif;
+    --font-serif: 'Playfair Display', serif;
 
     /* Cream background - #F8F4EC */
     --background: 40 33% 95%;
@@ -18,8 +19,8 @@
     --card: 0 0% 100%;
     --card-foreground: 26 19% 24%;
     
-    /* Sage green - #7A9E7E */
-    --primary: 127 21% 55%;
+    /* Warm brown - #8B5E3C */
+    --primary: 26 39% 39%;
     --primary-foreground: 0 0% 100%;
     
     /* Warm brown (darker) - #8B5E3C */
@@ -39,7 +40,7 @@
     
     --border: 40 20% 85%;
     --input: 40 20% 85%;
-    --ring: 127 21% 55%;
+    --ring: 26 39% 39%;
 
     --radius: 1.25rem;
   }

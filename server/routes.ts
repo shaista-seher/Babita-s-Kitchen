@@ -10,8 +10,11 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
-  await setupAuth(app);
-  registerAuthRoutes(app);
+  // Only setup auth if REPL_ID is configured (for Replit deployment)
+  if (process.env.REPL_ID) {
+    await setupAuth(app);
+    registerAuthRoutes(app);
+  }
 
   // Products
   app.get(api.products.list.path, async (req, res) => {
@@ -129,71 +132,8 @@ export async function registerRoutes(
   });
 
   // Optional: Seed database endpoint for easy setup
-  app.post('/api/seed', async (req, res) => {
-    await seedDatabase();
-    res.json({ message: "Database seeded" });
-  });
-
-  // Call it on startup for MVP
-  seedDatabase().catch(console.error);
-
-  return httpServer;
-}
-
-async function seedDatabase() {
-  const categories = await storage.getCategories();
-  if (categories.length > 0) return; // Already seeded
-
-  console.log("Seeding database...");
+  // Note: This requires a local PostgreSQL database
+  // For Supabase, data is managed in the Supabase dashboard
   
-  const c1 = await storage.createCategory({ name: "Breakfast", slug: "breakfast" });
-  const c2 = await storage.createCategory({ name: "Healthy Bowls", slug: "healthy-bowls" });
-  const c3 = await storage.createCategory({ name: "Dinner", slug: "dinner" });
-
-  await storage.createProduct({
-    name: "Babita's Signature Oatmeal",
-    description: "Organic oats topped with fresh berries, chia seeds, and a drizzle of local honey.",
-    price: "8.99",
-    categoryId: c1.id,
-    ingredients: ["Organic Oats", "Mixed Berries", "Chia Seeds", "Honey", "Almond Milk"],
-    calories: 350,
-    isOrganic: true,
-    isVeg: true,
-    isHighProtein: false,
-    prepTimeMinutes: 10,
-    isSpecial: true,
-    imageUrl: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=500&h=500&fit=crop"
-  });
-
-  await storage.createProduct({
-    name: "Quinoa Power Bowl",
-    description: "Protein-packed quinoa with roasted sweet potatoes, avocado, and tahini dressing.",
-    price: "12.50",
-    categoryId: c2.id,
-    ingredients: ["Quinoa", "Sweet Potato", "Avocado", "Tahini", "Kale"],
-    calories: 420,
-    isOrganic: true,
-    isVeg: true,
-    isGlutenFree: true,
-    isHighProtein: true,
-    prepTimeMinutes: 15,
-    imageUrl: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=500&fit=crop"
-  });
-
-  await storage.createProduct({
-    name: "Farmhouse Chicken Stew",
-    description: "Slow-cooked organic chicken with seasonal root vegetables in a rich broth.",
-    price: "15.99",
-    categoryId: c3.id,
-    ingredients: ["Organic Chicken", "Carrots", "Potatoes", "Celery", "Herbs"],
-    calories: 550,
-    isOrganic: true,
-    isVeg: false,
-    isHighProtein: true,
-    prepTimeMinutes: 30,
-    isSpecial: true,
-    imageUrl: "https://images.unsplash.com/photo-1604152135912-04a022e23696?w=500&h=500&fit=crop"
-  });
-
-  console.log("Database seeding completed.");
+  return httpServer;
 }

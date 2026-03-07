@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Layout } from "@/components/layout";
 import { useCart } from "@/context/cart-context";
-import { useAuth } from "@/hooks/use-auth";
-import { useAddresses, useCreateOrder } from "@/hooks/use-shop";
-import { Trash2, ShoppingBag, ArrowRight, MapPin, Clock } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import { useAddresses, useCreateOrder } from "@/hooks/use-supabase";
+import { Trash2, ShoppingBag, ArrowRight, MapPin, Clock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,8 +13,8 @@ import { motion } from "framer-motion";
 
 export default function Cart() {
   const { items, updateQuantity, removeItem, totalPrice, clearCart } = useCart();
-  const { isAuthenticated } = useAuth();
-  const { data: addresses } = useAddresses();
+  const { user, isAuthenticated } = useAuth();
+  const { data: addresses } = useAddresses(user?.id || "");
   const createOrder = useCreateOrder();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -27,8 +27,8 @@ export default function Cart() {
   const finalTotal = totalPrice + tax + deliveryFee;
 
   const handleCheckout = () => {
-    if (!isAuthenticated) {
-      window.location.href = "/api/login";
+    if (!isAuthenticated || !user) {
+      setLocation("/login");
       return;
     }
     
@@ -38,6 +38,7 @@ export default function Cart() {
     }
 
     createOrder.mutate({
+      userId: user.id,
       address: deliveryAddress,
       timeSlot,
       items: items.map(item => ({ productId: item.product.id, quantity: item.quantity }))
@@ -160,14 +161,14 @@ export default function Cart() {
                     </label>
                     {addresses && addresses.length > 0 && (
                       <div className="mb-3 space-y-2">
-                        {addresses.map(addr => (
+                        {addresses.map((addr: any) => (
                           <div 
                             key={addr.id}
-                            onClick={() => setDeliveryAddress(addr.address)}
-                            className={`p-3 rounded-xl border cursor-pointer transition-all text-sm ${deliveryAddress === addr.address ? 'border-primary bg-primary/5 shadow-sm' : 'border-border hover:border-primary/30'}`}
+                            onClick={() => setDeliveryAddress(addr.full_address || addr.address)}
+                            className={`p-3 rounded-xl border cursor-pointer transition-all text-sm ${deliveryAddress === (addr.full_address || addr.address) ? 'border-primary bg-primary/5 shadow-sm' : 'border-border hover:border-primary/30'}`}
                           >
                             <div className="font-medium mb-1">{addr.label}</div>
-                            <div className="text-muted-foreground">{addr.address}</div>
+                            <div className="text-muted-foreground">{addr.full_address || addr.address}</div>
                           </div>
                         ))}
                       </div>

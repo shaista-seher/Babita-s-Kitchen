@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Layout } from "@/components/layout";
 import { ProductCard } from "@/components/product-card";
-import { useProducts, useCategories } from "@/hooks/use-shop";
+import { HeroSlider } from "@/components/hero";
+import { useProducts, useCategories } from "@/hooks/use-supabase";
 import { Search, Loader2, ChefHat, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
@@ -34,52 +35,8 @@ export default function Home() {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-20 lg:pt-20 lg:pb-32 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40 z-10" />
-          {/* landing page hero organic healthy food spread */}
-          <img 
-            src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1920&h=800&fit=crop" 
-            alt="Healthy fresh food" 
-            className="w-full h-full object-cover object-right"
-          />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-2xl"
-          >
-            <span className="inline-block py-1.5 px-4 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 border border-primary/20 backdrop-blur-sm">
-              ✨ Freshly prepared today
-            </span>
-            <h1 className="text-5xl lg:text-7xl font-display font-bold text-foreground mb-6 leading-[1.1]">
-              Nourish your body, <br/>
-              <span className="text-primary italic font-serif font-light">delight your soul.</span>
-            </h1>
-            <p className="text-lg text-secondary/80 mb-10 max-w-lg leading-relaxed">
-              Experience the true taste of home with our organic, chef-crafted meals delivered straight to your door.
-            </p>
-            
-            <div className="relative max-w-md glass rounded-2xl p-2 flex items-center shadow-lg">
-              <Search className="w-5 h-5 text-muted-foreground ml-3" />
-              <Input 
-                type="text"
-                placeholder="What are you craving?"
-                className="border-0 bg-transparent focus-visible:ring-0 text-lg px-4"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <Button className="rounded-xl bg-secondary hover:bg-secondary/90 text-white px-6">
-                Search
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* Hero Section - Premium Animated Slider */}
+      <HeroSlider />
 
       {/* Main Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

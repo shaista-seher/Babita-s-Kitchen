@@ -1,6 +1,6 @@
 import { useParams, Link } from "wouter";
 import { Layout } from "@/components/layout";
-import { useProduct } from "@/hooks/use-shop";
+import { useProduct } from "@/hooks/use-supabase";
 import { useCart } from "@/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ArrowLeft, Leaf, Flame, Clock, Info, WheatOff, Dumbbell, Check } from "lucide-react";
