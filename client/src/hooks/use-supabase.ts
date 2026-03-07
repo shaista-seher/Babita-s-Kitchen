@@ -374,7 +374,32 @@ export function useProducts(params?: {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        console.warn("Supabase error, falling back to demo products:", error.message);
+        // Fall back to demo products on error
+        let filtered = [...DEMO_PRODUCTS];
+        
+        if (params?.search) {
+          const search = params.search.toLowerCase();
+          filtered = filtered.filter(p => 
+            p.name.toLowerCase().includes(search) || 
+            p.description.toLowerCase().includes(search)
+          );
+        }
+        
+        if (params?.category) {
+          const cat = DEMO_CATEGORIES.find(c => c.slug === params.category);
+          if (cat) {
+            filtered = filtered.filter(p => p.categoryId === cat.id);
+          }
+        }
+        
+        if (params?.isVeg) filtered = filtered.filter(p => p.isVeg);
+        if (params?.isGlutenFree) filtered = filtered.filter(p => p.isGlutenFree);
+        if (params?.isHighProtein) filtered = filtered.filter(p => p.isHighProtein);
+        
+        return filtered;
+      }
       
       // If no products in Supabase, return demo products
       if (!data || data.length === 0) {
@@ -436,7 +461,10 @@ export function useCategories() {
       }
 
       const { data, error } = await supabase!.from("categories").select("*");
-      if (error) throw error;
+      if (error) {
+        console.warn("Supabase error, falling back to demo categories:", error.message);
+        return DEMO_CATEGORIES;
+      }
       return data;
     },
   });
