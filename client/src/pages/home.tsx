@@ -3,10 +3,11 @@ import { Layout } from "@/components/layout";
 import { ProductCard } from "@/components/product-card";
 import { HeroSlider } from "@/components/hero";
 import { useProducts, useCategories } from "@/hooks/use-supabase";
-import { Search, Loader2, ChefHat, Filter } from "lucide-react";
+import { Search, Loader2, ChefHat, Filter, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -41,6 +42,43 @@ export default function Home() {
       {/* Main Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
+        {/* Search Bar */}
+        <div className="mb-10">
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input 
+              type="text"
+              placeholder="Search for papad, pickles, drinks..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-12 h-14 rounded-2xl text-lg shadow-md border-border/50 focus:border-primary"
+            />
+          </div>
+        </div>
+
+        {/* Shop by Category */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-display font-bold text-foreground mb-6">Shop by Category</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {categories?.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.slug)}
+                className={`group p-6 rounded-2xl border-2 transition-all ${
+                  activeCategory === cat.slug 
+                    ? 'border-primary bg-primary/5 shadow-md' 
+                    : 'border-border/50 bg-white hover:border-primary/30 hover:shadow-md'
+                }`}
+              >
+                <div className="text-center">
+                  <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">{cat.name}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Tap to view</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Categories & Filters */}
         <div className="flex flex-col lg:flex-row gap-8 justify-between items-start mb-12">
           <div className="flex-1 overflow-x-auto pb-4 -mb-4 hide-scrollbar w-full">
