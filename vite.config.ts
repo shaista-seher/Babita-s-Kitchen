@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
   ],
+  envDir: path.resolve(import.meta.dirname), // Look for .env in project root
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
