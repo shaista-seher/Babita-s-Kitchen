@@ -188,7 +188,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="absolute inset-0 z-0">
           <img src={navbarBg} alt="" className="w-full h-full object-cover" />
         </div>
-        <div className="absolute inset-0 z-0 bg-black/60"></div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
@@ -196,35 +195,35 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <div className="w-12 h-12 rounded-full overflow-hidden shadow-md">
                   <img src={bkLogo} alt="Logo" className="w-full h-full object-cover" />
                 </div>
-                <span className="font-semibold text-lg font-serif text-white">Babita's</span>
-                <span className="font-semibold text-lg font-serif text-white">Kitchen</span>
+                <span className="font-semibold text-lg font-serif" style={{ color: '#8B5E3C' }}>Babita's</span>
+                <span className="font-semibold text-lg font-serif" style={{ color: '#7A9E7E' }}>Kitchen</span>
               </div>
-              <p className="text-gray-300 max-w-sm leading-relaxed">
+              <p className="max-w-sm leading-relaxed" style={{ color: '#8B4513' }}>
                 True taste of home wherever you roam. We craft organic, wholesome, and delicious meals that nourish the soul.
               </p>
             </div>
             <div>
-              <h4 className="font-display font-semibold text-white mb-6">Explore</h4>
-              <ul className="space-y-4 text-gray-300">
-                <li><Link href="/" className="hover:text-white transition-colors">Today's Menu</Link></li>
-                <li><Link href="/" className="hover:text-white transition-colors">Meal Plans</Link></li>
-                <li><Link href="/" className="hover:text-white transition-colors">Gift Cards</Link></li>
+              <h4 className="font-display font-semibold mb-6" style={{ color: '#8B4513' }}>Explore</h4>
+              <ul className="space-y-4" style={{ color: '#A0522D' }}>
+                <li><Link href="/" className="hover:opacity-80 transition-opacity">Today's Menu</Link></li>
+                <li><Link href="/" className="hover:opacity-80 transition-opacity">Meal Plans</Link></li>
+                <li><Link href="/" className="hover:opacity-80 transition-opacity">Gift Cards</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-display font-semibold text-white mb-6">Support</h4>
-              <ul className="space-y-4 text-gray-300">
-                <li><Link href="/" className="hover:text-white transition-colors">Contact Us</Link></li>
-                <li><Link href="/" className="hover:text-white transition-colors">FAQ</Link></li>
-                <li><Link href="/" className="hover:text-white transition-colors">Delivery Info</Link></li>
+              <h4 className="font-display font-semibold mb-6" style={{ color: '#8B4513' }}>Support</h4>
+              <ul className="space-y-4" style={{ color: '#A0522D' }}>
+                <li><Link href="/" className="hover:opacity-80 transition-opacity">Contact Us</Link></li>
+                <li><Link href="/" className="hover:opacity-80 transition-opacity">FAQ</Link></li>
+                <li><Link href="/" className="hover:opacity-80 transition-opacity">Delivery Info</Link></li>
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-white/20 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-300">
+          <div className="pt-8 border-t border-black/10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm" style={{ color: '#A0522D' }}>
             <p>© {new Date().getFullYear()} Babita's Kitchen. All rights reserved.</p>
             <div className="flex gap-6">
-              <Link href="/" className="hover:text-white">Privacy Policy</Link>
-              <Link href="/" className="hover:text-white">Terms of Service</Link>
+              <Link href="/" className="hover:opacity-80">Privacy Policy</Link>
+              <Link href="/" className="hover:opacity-80">Terms of Service</Link>
             </div>
           </div>
         </div>
