@@ -69,6 +69,36 @@ export default function Home() {
               >
                 All Menu
               </button>
+              <button
+                onClick={() => setActiveCategory('pickles-achaar')}
+                className={`whitespace-nowrap px-6 py-3 rounded-full font-medium transition-all ${
+                  activeCategory === 'pickles-achaar' 
+                    ? 'bg-foreground text-background shadow-md' 
+                    : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
+                }`}
+              >
+                Pickles/Achaar
+              </button>
+              <button
+                onClick={() => setActiveCategory('chips')}
+                className={`whitespace-nowrap px-6 py-3 rounded-full font-medium transition-all ${
+                  activeCategory === 'chips' 
+                    ? 'bg-foreground text-background shadow-md' 
+                    : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
+                }`}
+              >
+                Chips
+              </button>
+              <button
+                onClick={() => setActiveCategory('healthy-drinks')}
+                className={`whitespace-nowrap px-6 py-3 rounded-full font-medium transition-all ${
+                  activeCategory === 'healthy-drinks' 
+                    ? 'bg-foreground text-background shadow-md' 
+                    : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
+                }`}
+              >
+                Healthy Drinks
+              </button>
               {categories?.map((cat) => (
                 <button
                   key={cat.id}
