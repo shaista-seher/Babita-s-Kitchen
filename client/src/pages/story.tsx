@@ -14,10 +14,10 @@ export default function Story() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground mb-6">
-              Our <span className="text-[#E2725B]">Story</span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground mb-6 tracking-wide">
+              OUR <span className="text-[#800000]">STORY</span>
             </h1>
-            <p className="text-xl md:text-2xl text-secondary/80 font-medium leading-relaxed">
+            <p className="text-xl md:text-2xl text-secondary/80 font-medium leading-relaxed font-serif italic">
               What began in 2020 as one woman's dream in her kitchen has blossomed into a powerful testament to female entrepreneurship.
             </p>
           </motion.div>
@@ -34,25 +34,25 @@ export default function Story() {
             className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-lg border border-border/30"
           >
             <div className="prose prose-lg max-w-none">
-              <p className="text-xl leading-relaxed text-secondary/80 mb-8">
+              <p className="text-xl leading-relaxed text-secondary/80 mb-8 font-serif">
                 Babita's unwavering spirit and culinary genius prove that when women support women, incredible things happen.
               </p>
 
               <div className="my-10 p-8 bg-amber-50 rounded-3xl border border-amber-100">
-                <p className="text-lg leading-relaxed text-secondary/90 italic">
+                <p className="text-lg leading-relaxed text-secondary/90 italic font-serif">
                   "Every spice, every recipe, every dish carries the essence of feminine strength and nurturing love. We're not just selling food—we're sharing the legacy of generations of women who have preserved culture through cuisine, breaking barriers and building empires from their kitchens."
                 </p>
               </div>
 
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-6">
-                Our Mission
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-6 tracking-wide">
+                OUR MISSION
               </h2>
-              <p className="text-lg leading-relaxed text-secondary/80 mb-8">
+              <p className="text-lg leading-relaxed text-secondary/80 mb-8 font-serif">
                 Our mission transcends business. We're creating opportunities for women, celebrating female leadership, and proving that the kitchen isn't just where meals are made—it's where revolutions begin.
               </p>
 
               <div className="my-10 p-8 bg-emerald-50 rounded-3xl border border-emerald-100">
-                <p className="text-lg leading-relaxed text-secondary/90 font-medium">
+                <p className="text-lg leading-relaxed text-secondary/90 font-medium font-serif">
                   When you choose Babita's Kitchen, you're investing in a woman's dream and supporting female-led enterprise.
                 </p>
               </div>
@@ -70,10 +70,10 @@ export default function Story() {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-              What We Stand For
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4 tracking-wide">
+              WHAT WE STAND FOR
             </h2>
-            <p className="text-lg text-secondary/70 max-w-2xl mx-auto">
+            <p className="text-lg text-secondary/70 max-w-2xl mx-auto font-serif italic">
               Our values guide everything we do, from sourcing ingredients to serving our community
             </p>
           </motion.div>
@@ -108,13 +108,13 @@ export default function Story() {
                 transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="bg-[#f8f6f2] rounded-3xl p-6 text-center hover:shadow-lg transition-shadow"
               >
-                <div className="w-14 h-14 bg-[#E2725B]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <value.icon className="w-7 h-7 text-[#E2725B]" />
+                <div className="w-14 h-14 bg-[#800000]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <value.icon className="w-7 h-7 text-[#800000]" />
                 </div>
-                <h3 className="font-display font-semibold text-lg text-foreground mb-2">
-                  {value.title}
+                <h3 className="font-display font-semibold text-lg text-foreground mb-2 tracking-wide">
+                  {value.title.toUpperCase()}
                 </h3>
-                <p className="text-sm text-secondary/70">
+                <p className="text-sm text-secondary/70 font-serif">
                   {value.description}
                 </p>
               </motion.div>
@@ -125,17 +125,17 @@ export default function Story() {
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#E2725B]/10 to-[#8B5E3C]/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#800000]/10 to-[#8B5E3C]/10" />
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-6">
-              Join Our Journey
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-6 tracking-wide">
+              JOIN OUR JOURNEY
             </h2>
-            <p className="text-lg text-secondary/80 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-secondary/80 mb-8 max-w-2xl mx-auto font-serif">
               Be part of something bigger. Every meal you order supports female entrepreneurship and keeps traditions alive.
             </p>
           </motion.div>
