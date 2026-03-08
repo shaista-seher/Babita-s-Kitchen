@@ -10,37 +10,37 @@
     --font-display: 'Poppins', sans-serif;
     --font-serif: 'Playfair Display', serif;
 
-    /* Cream background - #F8F4EC */
-    --background: 40 33% 95%;
-    /* Warm brown for text - #4A3B32 */
-    --foreground: 26 19% 24%;
+    /* Maroon background - #800000 */
+    --background: 0 50% 25%;
+    /* White for text on maroon */
+    --foreground: 0 0% 100%;
     
-    /* White cards floating on cream */
-    --card: 0 0% 100%;
-    --card-foreground: 26 19% 24%;
+    /* White cards floating on maroon */
+    --card: 0 50% 20%;
+    --card-foreground: 0 0% 100%;
     
-    /* Warm brown - #8B5E3C */
-    --primary: 26 39% 39%;
-    --primary-foreground: 0 0% 100%;
+    /* Gold accent for maroon theme - #D4AF37 */
+    --primary: 46 65% 54%;
+    --primary-foreground: 0 50% 25%;
     
-    /* Warm brown (darker) - #8B5E3C */
-    --secondary: 26 39% 39%;
+    /* Darker maroon for secondary */
+    --secondary: 0 50% 20%;
     --secondary-foreground: 0 0% 100%;
     
-    /* Soft terracotta - #E2725B */
-    --accent: 10 68% 62%;
-    --accent-foreground: 0 0% 100%;
+    /* Gold - #D4AF37 */
+    --accent: 46 65% 54%;
+    --accent-foreground: 0 50% 25%;
     
-    /* Destructive maps to Terracotta for this organic theme */
-    --destructive: 10 68% 62%;
-    --destructive-foreground: 0 0% 100%;
+    /* Gold for destructive */
+    --destructive: 46 65% 54%;
+    --destructive-foreground: 0 50% 25%;
 
-    --muted: 40 20% 90%;
-    --muted-foreground: 26 10% 50%;
+    --muted: 0 30% 20%;
+    --muted-foreground: 0 10% 70%;
     
-    --border: 40 20% 85%;
-    --input: 40 20% 85%;
-    --ring: 26 39% 39%;
+    --border: 0 30% 30%;
+    --input: 0 30% 30%;
+    --ring: 46 65% 54%;
 
     --radius: 1.25rem;
   }
