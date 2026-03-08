@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -6,8 +6,16 @@ interface HeroSliderProps {
   className?: string;
 }
 
-// Using the pickle image as full background
-const HERO_BACKGROUND = "/papad and pickle.2.jpeg";
+// Array of hero backgrounds for each slide
+const HERO_BACKGROUNDS = [
+  "/papad and pickle.2.jpeg",
+  "/papad and pickle.1.jpeg",
+  "/papad and pickle.3.jpeg",
+  "/papad and pickle.jpeg"
+];
+
+// Auto-slide interval in milliseconds (5 seconds)
+const AUTO_SLIDE_INTERVAL = 5000;
 
 export function HeroSlider({ className = "" }: HeroSliderProps) {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -22,17 +30,35 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
     }
   }, [activeSlide, isAnimating]);
 
+  // Auto-slide functionality
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isAnimating) {
+        setActiveSlide((prev) => (prev + 1) % HERO_BACKGROUNDS.length);
+      }
+    }, AUTO_SLIDE_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [isAnimating]);
+
   return (
     <section 
       className={`relative h-[70vh] w-full overflow-hidden ${className}`}
     >
       {/* Full Background Image */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src={HERO_BACKGROUND}
-          alt="Babita's Kitchen"
-          className="w-full h-full object-cover"
-        />
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={activeSlide}
+            src={HERO_BACKGROUNDS[activeSlide]}
+            alt="Babita's Kitchen"
+            className="w-full h-full object-cover"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          />
+        </AnimatePresence>
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/50" />
       </div>
