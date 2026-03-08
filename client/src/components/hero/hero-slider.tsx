@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -43,7 +43,7 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
 
   return (
     <section 
-      className={`relative h-[50vh] md:h-[70vh] w-full overflow-hidden ${className}`}
+      className={`relative h-[40vh] md:h-[70vh] w-full overflow-hidden ${className}`}
     >
       {/* Full Background Image */}
       <div className="absolute inset-0 z-0">
