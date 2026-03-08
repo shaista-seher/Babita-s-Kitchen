@@ -193,8 +193,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-20 h-20 rounded-full overflow-hidden shadow-md">
-                  <img src={bk2Logo} alt="Logo" className="w-full h-full object-cover" />
+                <div className="w-16 h-16 rounded-full overflow-hidden shadow-md">
+                  <img src={bk2Logo} alt="Logo" className="w-full h-full object-cover object-center scale-110" />
                 </div>
                 <span className="font-semibold text-2xl font-serif" style={{ color: '#8B5E3C' }}>Babita's</span>
                 <span className="font-semibold text-2xl font-serif" style={{ color: '#7A9E7E' }}>Kitchen</span>
