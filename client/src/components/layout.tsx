@@ -70,7 +70,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <nav className="hidden md:flex items-center gap-8 font-medium text-foreground/90">
             <Link href="/" className={`hover:text-primary transition-colors ${locationPath === '/' || locationPath === '/home' ? 'text-primary font-semibold' : ''}`}>Menu</Link>
             <Link href="/" className="hover:text-primary transition-colors">Specials</Link>
-            <Link href="/" className="hover:text-primary transition-colors">Our Story</Link>
+            <Link href="/story" className={`hover:text-primary transition-colors ${locationPath === '/story' ? 'text-primary font-semibold' : ''}`}>Our Story</Link>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-4">

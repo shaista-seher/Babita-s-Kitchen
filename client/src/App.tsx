@@ -16,6 +16,7 @@ import Profile from "@/pages/profile";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import ForgotPassword from "@/pages/forgot-password";
+import Story from "@/pages/story";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/signup" component={Signup} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/product/:id" component={ProductDetails} />
+      <Route path="/story" component={Story} />
       
       {/* Protected routes */}
       <Route path="/cart">
