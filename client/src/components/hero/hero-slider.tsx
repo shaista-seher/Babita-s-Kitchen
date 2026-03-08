@@ -1,4 +1,4 @@
- import { useState, useCallback, useEffect } from "react";
+ import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -20,13 +20,25 @@ const AUTO_SLIDE_INTERVAL = 5000;
 export function HeroSlider({ className = "" }: HeroSliderProps) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+
+  // Preload all images on mount
+  useEffect(() => {
+    HERO_BACKGROUNDS.forEach((src, index) => {
+      const img = new Image();
+      img.onload = () => {
+        setLoadedImages(prev => new Set([...prev, index]));
+      };
+      img.src = src;
+    });
+  }, []);
 
   // Handle navigation
   const goToSlide = useCallback((slideIndex: number) => {
     if (slideIndex !== activeSlide && !isAnimating) {
       setIsAnimating(true);
       setActiveSlide(slideIndex);
-      setTimeout(() => setIsAnimating(false), 600);
+      setTimeout(() => setIsAnimating(false), 500);
     }
   }, [activeSlide, isAnimating]);
 
@@ -44,6 +56,7 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
   return (
     <section 
       className={`relative h-[40vh] md:h-[70vh] w-full overflow-hidden ${className}`}
+      id="specials"
     >
       {/* Full Background Image */}
       <div className="absolute inset-0 z-0">
@@ -53,10 +66,11 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
             src={HERO_BACKGROUNDS[activeSlide]}
             alt="Babita's Kitchen"
             className="w-full h-full object-cover"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            loading="eager"
           />
         </AnimatePresence>
         {/* Dark overlay for text readability */}
@@ -77,7 +91,7 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="text-center"
               >
                 <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4 drop-shadow-lg">
@@ -97,7 +111,7 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="text-center"
               >
                 <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
@@ -117,7 +131,7 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="text-center"
               >
                 <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
@@ -137,7 +151,7 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="text-center"
               >
                 <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">

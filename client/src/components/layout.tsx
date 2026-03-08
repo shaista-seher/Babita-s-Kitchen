@@ -68,9 +68,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 font-medium text-foreground/90">
-            <Link href="/" className={`hover:text-primary transition-colors ${locationPath === '/' || locationPath === '/home' ? 'text-primary font-semibold' : ''}`}>Menu</Link>
-            <Link href="/" className="hover:text-primary transition-colors">Specials</Link>
-            <Link href="/story" className={`hover:text-primary transition-colors ${locationPath === '/story' ? 'text-primary font-semibold' : ''}`}>Our Story</Link>
+            <Link href="/" className={`hover:text-[#800000] transition-colors ${locationPath === '/' || locationPath === '/home' ? 'text-[#800000] font-semibold' : ''}`}>Menu</Link>
+            <Link href="/#specials" className="hover:text-[#800000] transition-colors">Specials</Link>
+            <Link href="/story" className={`hover:text-[#800000] transition-colors ${locationPath === '/story' ? 'text-[#800000] font-semibold' : ''}`}>Our Story</Link>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-4">
@@ -224,19 +224,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </p>
             </div>
             <div>
-              <h4 className="font-display font-semibold mb-6" style={{ color: '#8B4513' }}>Explore</h4>
+              <h4 className="font-display font-semibold mb-6" style={{ color: '#800000' }}>Explore</h4>
               <ul className="space-y-4" style={{ color: '#A0522D' }}>
                 <li><Link href="/" className="hover:opacity-80 transition-opacity">Today's Menu</Link></li>
-                <li><Link href="/" className="hover:opacity-80 transition-opacity">Meal Plans</Link></li>
-                <li><Link href="/" className="hover:opacity-80 transition-opacity">Gift Cards</Link></li>
+                <li><Link href="/story" className="hover:opacity-80 transition-opacity">Our Story</Link></li>
+                <li><Link href="/#specials" className="hover:opacity-80 transition-opacity">Specials</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-display font-semibold mb-6" style={{ color: '#8B4513' }}>Support</h4>
+              <h4 className="font-display font-semibold mb-6" style={{ color: '#800000' }}>Support</h4>
               <ul className="space-y-4" style={{ color: '#A0522D' }}>
-                <li><Link href="/" className="hover:opacity-80 transition-opacity">Contact Us</Link></li>
-                <li><Link href="/" className="hover:opacity-80 transition-opacity">FAQ</Link></li>
-                <li><Link href="/" className="hover:opacity-80 transition-opacity">Delivery Info</Link></li>
+                <li><a href="mailto:contact@babitaskitchen.com" className="hover:opacity-80 transition-opacity">Contact Us</Link></li>
+                <li><Link href="/#faq" className="hover:opacity-80 transition-opacity">FAQ</Link></li>
+                <li><Link href="/#delivery" className="hover:opacity-80 transition-opacity">Delivery Info</Link></li>
               </ul>
             </div>
           </div>
