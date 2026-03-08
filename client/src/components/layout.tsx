@@ -52,8 +52,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Mobile App Container */}
-      <div className="max-w-[420px] mx-auto w-full min-h-screen bg-[#f8f6f2] flex flex-col">
+      {/* Responsive Container - Full width on mobile, centered with max-width on larger screens */}
+      <div className="w-full mx-auto min-h-screen bg-[#f8f6f2] flex flex-col">
         <header className="sticky top-0 z-50 border-b-0 pb-0 w-full">
         <div className="absolute inset-0 z-0">
           <img src={navbarBg} alt="" className="w-full h-full object-cover" />

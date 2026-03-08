@@ -45,18 +45,9 @@
     --radius: 1.25rem;
   }
 
-  body {
+body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-foreground;
     font-family: var(--font-sans);
-  }
-
-  /* Mobile app-like centered container */
-  html {
-    @apply bg-neutral-200;
-  }
-  
-  #root {
-    @apply flex justify-center min-h-screen;
   }
 
   h1, h2, h3, h4, h5, h6 {

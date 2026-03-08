@@ -39,7 +39,7 @@ export default function Home() {
       <HeroSlider />
 
       {/* Main Content */}
-      <section className="px-4 py-8 w-full">
+      <section className="px-4 md:px-6 lg:px-8 py-8 lg:py-12 w-full max-w-7xl mx-auto">
         
         {/* Search Bar */}
         <div className="mb-6">
@@ -147,7 +147,7 @@ export default function Home() {
             <p className="font-medium">Preparing the menu...</p>
           </div>
         ) : products && products.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {products.map((product, i) => (
               <motion.div
                 key={product.id}
