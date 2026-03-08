@@ -147,7 +147,7 @@ export default function Home() {
             <p className="font-medium">Preparing the menu...</p>
           </div>
         ) : products && products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {products.map((product, i) => (
               <motion.div
                 key={product.id}
