@@ -5,6 +5,7 @@ import { useLocation as useUserLocation } from "@/context/location-context";
 import { useCart } from "@/context/cart-context";
 import { ShoppingBag, User as UserIcon, LogOut, Menu, MapPin, Loader2, Search, X } from "lucide-react";
 import bkLogo from "@assets/BK_logo_new.jpeg";
+import bk2Logo from "@assets/BK2_logo.jpeg";
 import navbarBg from "@assets/navabar.jpeg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -193,7 +194,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-full overflow-hidden shadow-md">
-                  <img src={bkLogo} alt="Logo" className="w-full h-full object-cover" />
+                  <img src={bk2Logo} alt="Logo" className="w-full h-full object-cover" />
                 </div>
                 <span className="font-semibold text-lg font-serif" style={{ color: '#8B5E3C' }}>Babita's</span>
                 <span className="font-semibold text-lg font-serif" style={{ color: '#7A9E7E' }}>Kitchen</span>
