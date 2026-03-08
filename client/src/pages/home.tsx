@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState } from "react";
 import { Layout } from "@/components/layout";
 import { ProductCard } from "@/components/product-card";
 import { HeroSlider } from "@/components/hero";
@@ -39,11 +39,11 @@ export default function Home() {
       <HeroSlider />
 
       {/* Main Content */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <section className="px-4 py-8 w-full">
         
         {/* Search Bar */}
-        <div className="mb-10">
-          <div className="relative max-w-2xl mx-auto">
+        <div className="mb-6">
+          <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input 
               type="text"
@@ -56,32 +56,32 @@ export default function Home() {
         </div>
 
         {/* Categories & Filters */}
-        <div className="flex flex-col lg:flex-row gap-8 justify-between items-start mb-12">
-          <div className="flex-1 overflow-x-auto pb-4 -mb-4 hide-scrollbar w-full">
-          <div className="flex gap-3">
+        <div className="flex flex-col gap-4 mb-6 w-full">
+          <div className="overflow-x-auto pb-4 -mb-4 hide-scrollbar w-full">
+          <div className="flex gap-2">
               <button
                 onClick={() => setActiveCategory(undefined)}
-                className={`whitespace-nowrap px-6 py-3 rounded-full font-medium transition-all ${
+                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
                   !activeCategory 
                     ? 'bg-foreground text-background shadow-md' 
                     : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
                 }`}
               >
-                All Menu
+                All
               </button>
               <button
                 onClick={() => setActiveCategory('pickles-achaar')}
-                className={`whitespace-nowrap px-6 py-3 rounded-full font-medium transition-all ${
+                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
                   activeCategory === 'pickles-achaar' 
                     ? 'bg-foreground text-background shadow-md' 
                     : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
                 }`}
               >
-                Pickles/Achaar
+                Pickles
               </button>
               <button
                 onClick={() => setActiveCategory('chips')}
-                className={`whitespace-nowrap px-6 py-3 rounded-full font-medium transition-all ${
+                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
                   activeCategory === 'chips' 
                     ? 'bg-foreground text-background shadow-md' 
                     : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
@@ -91,19 +91,19 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setActiveCategory('healthy-drinks')}
-                className={`whitespace-nowrap px-6 py-3 rounded-full font-medium transition-all ${
+                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
                   activeCategory === 'healthy-drinks' 
                     ? 'bg-foreground text-background shadow-md' 
                     : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
                 }`}
               >
-                Healthy Drinks
+                Drinks
               </button>
               {categories?.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.slug)}
-                  className={`whitespace-nowrap px-6 py-3 rounded-full font-medium transition-all ${
+                  className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
                     activeCategory === cat.slug 
                       ? 'bg-foreground text-background shadow-md' 
                       : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
@@ -115,27 +115,27 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap shrink-0 bg-white p-2 rounded-2xl border border-border/50 shadow-sm">
+          <div className="flex items-center gap-2 flex-wrap bg-white p-2 rounded-2xl border border-border/50 shadow-sm">
             <div className="px-3 py-1 flex items-center gap-2 text-sm font-medium text-muted-foreground border-r border-border">
               <Filter className="w-4 h-4" /> Filters
             </div>
             <button 
               onClick={() => toggleFilter('isVeg')}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${filters.isVeg ? 'bg-emerald-100 text-emerald-800' : 'hover:bg-secondary/5 text-secondary'}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${filters.isVeg ? 'bg-emerald-100 text-emerald-800' : 'hover:bg-secondary/5 text-secondary'}`}
             >
-              Vegetarian
+              Veg
             </button>
             <button 
               onClick={() => toggleFilter('isGlutenFree')}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${filters.isGlutenFree ? 'bg-amber-100 text-amber-800' : 'hover:bg-secondary/5 text-secondary'}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${filters.isGlutenFree ? 'bg-amber-100 text-amber-800' : 'hover:bg-secondary/5 text-secondary'}`}
             >
-              Gluten-Free
+              GF
             </button>
             <button 
               onClick={() => toggleFilter('isHighProtein')}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${filters.isHighProtein ? 'bg-rose-100 text-rose-800' : 'hover:bg-secondary/5 text-secondary'}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${filters.isHighProtein ? 'bg-rose-100 text-rose-800' : 'hover:bg-secondary/5 text-secondary'}`}
             >
-              High Protein
+              Protein
             </button>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function Home() {
             <p className="font-medium">Preparing the menu...</p>
           </div>
         ) : products && products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 gap-4">
             {products.map((product, i) => (
               <motion.div
                 key={product.id}

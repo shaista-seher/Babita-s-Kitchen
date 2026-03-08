@@ -52,7 +52,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-50 border-b-0 pb-0">
+      {/* Mobile App Container */}
+      <div className="max-w-[420px] mx-auto w-full min-h-screen bg-[#f8f6f2] flex flex-col">
+        <header className="sticky top-0 z-50 border-b-0 pb-0 w-full">
         <div className="absolute inset-0 z-0">
           <img src={navbarBg} alt="" className="w-full h-full object-cover" />
         </div>
@@ -199,11 +201,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col w-full">
         {children}
       </main>
 
-      <footer className="mt-20 pt-16 pb-8 border-t border-border/20 relative overflow-hidden">
+      <footer className="mt-auto pt-16 pb-8 border-t border-border/20 relative overflow-hidden w-full">
         <div className="absolute inset-0 z-0">
           <img src={navbarBg} alt="" className="w-full h-full object-cover" />
         </div>
@@ -320,6 +322,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
