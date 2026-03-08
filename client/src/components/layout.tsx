@@ -192,12 +192,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full overflow-hidden shadow-md">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-20 h-20 rounded-full overflow-hidden shadow-md">
                   <img src={bk2Logo} alt="Logo" className="w-full h-full object-cover" />
                 </div>
-                <span className="font-semibold text-lg font-serif" style={{ color: '#8B5E3C' }}>Babita's</span>
-                <span className="font-semibold text-lg font-serif" style={{ color: '#7A9E7E' }}>Kitchen</span>
+                <span className="font-semibold text-2xl font-serif" style={{ color: '#8B5E3C' }}>Babita's</span>
+                <span className="font-semibold text-2xl font-serif" style={{ color: '#7A9E7E' }}>Kitchen</span>
               </div>
               <p className="max-w-sm leading-relaxed" style={{ color: '#8B4513' }}>
                 True taste of home wherever you roam. We craft organic, wholesome, and delicious meals that nourish the soul.
