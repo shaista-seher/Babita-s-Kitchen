@@ -8,9 +8,11 @@ import bkLogo from "@assets/BK_logo_new.jpeg";
 import bk2Logo from "@assets/BK2_logo.jpeg";
 import navbarBg from "@assets/navabar.jpeg";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAuthenticated, signOut } = useAuth();
   const { location, requestLocation, searchLocation, isLoading: locationLoading, clearLocation } = useUserLocation();
   const { totalItems } = useCart();
@@ -194,8 +196,56 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             )}
             
-            <Button variant="ghost" size="icon" className="md:hidden text-primary">
-              <Menu className="w-6 h-6" />
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden text-primary">
+                  <Menu className="w-6 h-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[350px] bg-[#f8f6f2]">
+                <div className="flex flex-col h-full py-6">
+                  <div className="flex items-center justify-between mb-8">
+                    <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                      <img src={bkLogo} alt="Babita's Kitchen" className="w-16 h-16 object-contain rounded-full" />
+                    </Link>
+                    <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
+                  
+                  <div className="flex-1">
+                    <ul className="space-y-4" style={{ color: '#A0522D' }}>
+                      <li>
+                        <Link href="/" className="text-lg font-medium hover:opacity-80 transition-opacity" onClick={() => setMobileMenuOpen(false)}>
+                          Today's Menu
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/#specials" className="text-lg font-medium hover:opacity-80 transition-opacity" onClick={() => setMobileMenuOpen(false)}>
+                          Specials
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/story" className="text-lg font-medium hover:opacity-80 transition-opacity" onClick={() => setMobileMenuOpen(false)}>
+                          Our Story
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                  
+                  <div className="border-t border-border/20 pt-6 mt-6">
+                    <h4 className="font-display font-semibold mb-4" style={{ color: '#800000' }}>Support</h4>
+                    <ul className="space-y-3" style={{ color: '#A0522D' }}>
+                      <li>
+                        <a href="mailto:contact@babitaskitchen.com" className="hover:opacity-80 transition-opacity">
+                          Contact Us
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
             </Button>
           </div>
         </div>
