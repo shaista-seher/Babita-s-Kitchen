@@ -70,15 +70,15 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
       className={`relative h-[40vh] md:h-[70vh] w-full overflow-hidden ${className}`}
       id="specials"
     >
-      {/* Full Background - Show active image directly without animation */}
+      {/* Full Background - Switch images instantly without fade */}
       <div className="absolute inset-0 z-0">
         {HERO_BACKGROUNDS.map((src, index) => (
           <img
             key={index}
             src={src}
             alt="Babita's Kitchen"
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-              index === activeSlide ? "opacity-100" : "opacity-0"
+            className={`absolute inset-0 w-full h-full object-cover ${
+              index === activeSlide ? "block" : "hidden"
             }`}
           />
         ))}
