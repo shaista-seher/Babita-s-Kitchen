@@ -23,12 +23,12 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.id}`} className="group block">
       <div className="bg-card rounded-3xl overflow-hidden premium-shadow h-full flex flex-col border border-transparent hover:border-primary/10 transition-colors">
-        <div className="relative aspect-square overflow-hidden bg-secondary/5">
+        <div className="relative h-40 sm:h-48 overflow-hidden bg-secondary/5">
           {product.imageUrl ? (
             <img 
               src={product.imageUrl} 
               alt={product.name}
-              className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
@@ -50,7 +50,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
 
-        <div className="p-6 flex flex-col flex-1">
+        <div className="p-3 sm:p-4 flex flex-col flex-1">
           <div className="flex justify-between items-start mb-2 gap-4">
             <h3 className="font-display font-semibold text-lg text-foreground leading-tight">
               {product.name}
@@ -62,7 +62,7 @@ export function ProductCard({ product }: { product: Product }) {
             {product.description}
           </p>
 
-          <div className="flex items-center gap-3 mb-6 flex-wrap">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
             {product.isVeg && (
               <div className="flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 block"></span>
