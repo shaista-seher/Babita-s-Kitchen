@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/auth-context";
 import { useLocation as useUserLocation } from "@/context/location-context";
@@ -17,6 +17,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [locationPath] = useLocation();
   const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [locationQuery, setLocationQuery] = useState("");
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+
+  // Auto-prompt for location after login if not set
+  useEffect(() => {
+    if (isAuthenticated && !location) {
+      // Small delay to let the page load first
+      const timer = setTimeout(() => {
+        setShowLocationPrompt(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, location]);
 
   const handleLogout = async () => {
     await signOut();
@@ -28,8 +40,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (locationQuery.trim()) {
       await searchLocation(locationQuery);
       setShowLocationSearch(false);
+      setShowLocationPrompt(false);
       setLocationQuery("");
     }
+  };
+
+  const handleRequestLocation = async () => {
+    await requestLocation();
+    setShowLocationPrompt(false);
   };
 
   return (
@@ -54,12 +72,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Location Indicator with Search */}
+            {/* Location Indicator with Search - visible on all screens */}
             {isAuthenticated && (
               <div className="relative">
                 <button 
                   onClick={() => setShowLocationSearch(!showLocationSearch)}
-                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-sm hover:bg-primary/30 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-sm hover:bg-primary/30 transition-colors"
                 >
                   {locationLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -67,9 +85,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <MapPin className="w-4 h-4" />
                   )}
                   {location ? (
-                    <span className="max-w-[150px] truncate">{location.areaName || 'Delivery set'}</span>
+                    <span className="max-w-[150px] truncate hidden sm:inline">{location.areaName || 'Delivery set'}</span>
                   ) : (
-                    <span>Set Location</span>
+                    <span className="hidden sm:inline">Set Location</span>
                   )}
                 </button>
 
@@ -229,6 +247,79 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </footer>
+
+      {/* Location Prompt Modal - Shows after login */}
+      {showLocationPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-300">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MapPin className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">Set Your Delivery Location</h3>
+              <p className="text-muted-foreground text-sm">
+                We need your location to show available restaurants and delivery options near you.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Button 
+                onClick={handleRequestLocation}
+                disabled={locationLoading}
+                className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium"
+              >
+                {locationLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Getting your location...
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="w-5 h-5 mr-2" />
+                    Use Current Location
+                  </>
+                )}
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-muted-foreground">Or</span>
+                </div>
+              </div>
+
+              <form onSubmit={handleLocationSearch} className="space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input 
+                    type="text"
+                    placeholder="Enter your address..."
+                    value={locationQuery}
+                    onChange={(e) => setLocationQuery(e.target.value)}
+                    className="pl-10 h-12 rounded-xl"
+                  />
+                </div>
+                <Button 
+                  type="submit"
+                  disabled={locationLoading || !locationQuery.trim()}
+                  className="w-full h-12 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/90 font-medium"
+                >
+                  {locationLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Search Address'}
+                </Button>
+              </form>
+
+              <button 
+                onClick={() => setShowLocationPrompt(false)}
+                className="w-full text-sm text-muted-foreground hover:text-foreground py-2"
+              >
+                Skip for now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
