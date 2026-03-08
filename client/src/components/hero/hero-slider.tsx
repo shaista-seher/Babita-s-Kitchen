@@ -1,5 +1,5 @@
- import { useState, useCallback, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+ import { useState, useCallback, useEffect } from "react";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface HeroSliderProps {
@@ -17,18 +17,42 @@ const HERO_BACKGROUNDS = [
 // Auto-slide interval in milliseconds (5 seconds)
 const AUTO_SLIDE_INTERVAL = 5000;
 
+// Slide content data
+const SLIDE_CONTENT = [
+  {
+    title: "Nourish your body, ",
+    subtitle: "delight your soul.",
+    titleHighlight: true,
+    text: "True taste of home wherever you roam."
+  },
+  {
+    title: "Authentic homemade ",
+    subtitle: "mango pickle.",
+    titleHighlight: false,
+    text: "Made with love, using traditional recipes passed down through generations."
+  },
+  {
+    title: "Premium Quality ",
+    subtitle: "Ingredients",
+    titleHighlight: false,
+    text: "Sourced from the finest farms."
+  },
+  {
+    title: "Taste the ",
+    subtitle: "Tradition",
+    titleHighlight: true,
+    text: "Order now and experience authentic flavors."
+  }
+];
+
 export function HeroSlider({ className = "" }: HeroSliderProps) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
-  // Preload all images on mount
+  // Preload all images
   useEffect(() => {
-    HERO_BACKGROUNDS.forEach((src, index) => {
+    HERO_BACKGROUNDS.forEach((src) => {
       const img = new Image();
-      img.onload = () => {
-        setLoadedImages(prev => new Set([...prev, index]));
-      };
       img.src = src;
     });
   }, []);
@@ -38,7 +62,7 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
     if (slideIndex !== activeSlide && !isAnimating) {
       setIsAnimating(true);
       setActiveSlide(slideIndex);
-      setTimeout(() => setIsAnimating(false), 500);
+      setTimeout(() => setIsAnimating(false), 300);
     }
   }, [activeSlide, isAnimating]);
 
@@ -53,6 +77,8 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
     return () => clearInterval(interval);
   }, [isAnimating]);
 
+  const content = SLIDE_CONTENT[activeSlide];
+
   return (
     <section 
       className={`relative h-[40vh] md:h-[70vh] w-full overflow-hidden ${className}`}
@@ -60,110 +86,52 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
     >
       {/* Full Background Image */}
       <div className="absolute inset-0 z-0">
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={activeSlide}
-            src={HERO_BACKGROUNDS[activeSlide]}
-            alt="Babita's Kitchen"
-            className="w-full h-full object-cover"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            loading="eager"
-          />
-        </AnimatePresence>
+        {HERO_BACKGROUNDS.map((src, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              index === activeSlide ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <img
+              src={src}
+              alt="Babita's Kitchen"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/50" />
       </div>
 
       {/* Main Content */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center px-8">
-        
         {/* Text Content - Centered */}
         <div className="max-w-2xl text-center">
-          <AnimatePresence mode="wait">
-            
-            {/* Slide 1 Text */}
-            {activeSlide === 0 && (
-              <motion.div
-                key="slide1"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="text-center"
-              >
-                <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4 drop-shadow-lg">
-                  Nourish your body,{' '}
-                  <span className="text-amber-300 italic">delight your soul.</span>
-                </h1>
-                <p className="text-lg text-white/90 drop-shadow">
-                  True taste of home wherever you roam.
-                </p>
-              </motion.div>
+          <motion.div
+            key={activeSlide}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="text-center"
+          >
+            {activeSlide === 0 ? (
+              <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4 drop-shadow-lg">
+                {content.title}
+                <span className="text-amber-300 italic">{content.subtitle}</span>
+              </h1>
+            ) : (
+              <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+                {content.title}
+                <span className={activeSlide === 3 ? "text-red-400" : "text-amber-300"}>
+                  {content.subtitle}
+                </span>
+              </h2>
             )}
-
-            {/* Slide 2 Text */}
-            {activeSlide === 1 && (
-              <motion.div
-                key="slide2"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="text-center"
-              >
-                <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                  Authentic homemade{' '}
-                  <span className="text-amber-300">mango pickle.</span>
-                </h2>
-                <p className="text-lg text-white/80 drop-shadow max-w-md mx-auto">
-                  Made with love, using traditional recipes passed down through generations.
-                </p>
-              </motion.div>
-            )}
-
-            {/* Slide 3 Text */}
-            {activeSlide === 2 && (
-              <motion.div
-                key="slide3"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="text-center"
-              >
-                <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                  Premium Quality{' '}
-                  <span className="text-amber-300">Ingredients</span>
-                </h2>
-                <p className="text-lg text-white/80 drop-shadow">
-                  Sourced from the finest farms.
-                </p>
-              </motion.div>
-            )}
-
-            {/* Slide 4 Text */}
-            {activeSlide === 3 && (
-              <motion.div
-                key="slide4"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="text-center"
-              >
-                <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                  Taste the <span className="text-red-400">Tradition</span>
-                </h2>
-                <p className="text-lg text-white/80 drop-shadow">
-                  Order now and experience authentic flavors.
-                </p>
-              </motion.div>
-            )}
-
-          </AnimatePresence>
+            <p className="text-lg text-white/90 drop-shadow">
+              {content.text}
+            </p>
+          </motion.div>
         </div>
 
         {/* Navigation */}
