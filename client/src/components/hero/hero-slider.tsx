@@ -43,7 +43,7 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
 
   return (
     <section 
-      className={`relative h-[70vh] w-full overflow-hidden ${className}`}
+      className={`relative h-[50vh] md:h-[70vh] w-full overflow-hidden ${className}`}
     >
       {/* Full Background Image */}
       <div className="absolute inset-0 z-0">
