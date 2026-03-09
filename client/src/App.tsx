@@ -23,6 +23,7 @@ import Signup from "@/pages/signup";
 import ForgotPassword from "@/pages/forgot-password";
 import Story from "@/pages/story";
 import OpeningVideo from "@/pages/opening-video";
+import OTPVerification from "@/pages/otp-verification";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -36,7 +37,7 @@ function Router() {
       {/* Opening video - only shown once */}
       <Route path="/">
         {hasSeenOpening ? (
-          isAuthenticated ? (
+          isAuthenticated || localStorage.getItem("auth_token") ? (
             location ? (
               <Redirect href="/home" />
             ) : (
@@ -48,6 +49,11 @@ function Router() {
         ) : (
           <OpeningVideo />
         )}
+      </Route>
+
+      {/* OTP Verification Route */}
+      <Route path="/otp-verification">
+        <OTPVerification />
       </Route>
 
       {/* Location selection page */}
@@ -213,3 +219,4 @@ function App() {
 }
 
 export default App;
+

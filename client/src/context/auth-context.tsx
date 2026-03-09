@@ -9,6 +9,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signInWithPhone: (phone: string) => Promise<{ error: Error | null }>;
+  verifyOTP: (phone: string, otp: string) => Promise<{ error: Error | null; token?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
 }
@@ -21,8 +23,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check for stored token first
+    const storedToken = localStorage.getItem('auth_token');
+    
     if (!isSupabaseConfigured()) {
-      setIsLoading(false);
+      // If no Supabase but we have a token, simulate authenticated state
+      if (storedToken) {
+        const pendingPhone = sessionStorage.getItem('pendingPhone');
+        if (pendingPhone) {
+          setUser({
+            id: 'temp-user',
+            email: '',
+            phone: pendingPhone,
+          } as AppUser);
+        }
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+      }
       return;
     }
 
@@ -45,7 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const mapSupabaseUser = (supabaseUser: User): AppUser => {
     const { id, email, created_at } = supabaseUser;
-    // Try to get additional user metadata if available
     const userData = supabaseUser.user_metadata || {};
     return {
       id,
@@ -95,8 +112,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Send OTP to phone number
+  const signInWithPhone = async (phone: string) => {
+    try {
+      const response = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return { error: new Error(data.message || 'Failed to send OTP') };
+      }
+      
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  };
+
+  // Verify OTP and sign in
+  const verifyOTP = async (phone: string, otp: string): Promise<{ error: Error | null; token?: string }> => {
+    try {
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return { error: new Error(data.message || 'Invalid OTP') };
+      }
+      
+      // Store the token
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
+        
+        // Update user state
+        setUser({
+          id: data.userId || 'temp-user',
+          email: '',
+          phone: phone,
+        } as AppUser);
+      }
+      
+      return { error: null, token: data.token };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  };
+
   const signOut = async () => {
-    if (!isSupabaseConfigured()) return;
+    localStorage.removeItem('auth_token');
+    sessionStorage.removeItem('pendingPhone');
+    sessionStorage.removeItem('signupName');
+    
+    if (!isSupabaseConfigured()) {
+      setUser(null);
+      setSession(null);
+      return;
+    }
+    
     await supabase!.auth.signOut();
   };
 
@@ -119,9 +199,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user || !!localStorage.getItem('auth_token'),
     signUp,
     signIn,
+    signInWithPhone,
+    verifyOTP,
     signOut,
     resetPassword,
   };

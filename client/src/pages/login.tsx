@@ -1,18 +1,17 @@
- import { useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/auth-context";
-import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, Phone, Eye, EyeOff, ArrowRight, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import bkLogo from "@assets/BK_logo_1772721148069.jpeg";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [otpSent, setOtpSent] = useState(false);
   
   const { signIn, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
@@ -23,19 +22,52 @@ export default function Login() {
     return null;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, "");
+    // Limit to 10 digits
+    return digits.slice(0, 10);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setPhone(formatted);
+  };
+
+  const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (phone.length !== 10) {
+      setError("Please enter a valid 10-digit phone number");
+      return;
+    }
+
     setIsLoading(true);
 
-    const { error } = await signIn(email, password);
-    
-    if (error) {
-      setError(error.message);
+    try {
+      // Call the send OTP API
+      const response = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: `+91${phone}`, channel: "sms" }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send OTP");
+      }
+
+      // Store phone in sessionStorage for the OTP page
+      sessionStorage.setItem("pendingPhone", `+91${phone}`);
+      
+      // Navigate to OTP verification
+      setLocation(`/otp-verification?phone=${phone}`);
+    } catch (err: any) {
+      setError(err.message || "Failed to send OTP. Please try again.");
+    } finally {
       setIsLoading(false);
-    } else {
-      // Redirect to home page (will check for location)
-      setLocation("/");
     }
   };
 
@@ -54,14 +86,14 @@ export default function Login() {
               <img src={bkLogo} alt="Babita's Kitchen" className="w-full h-full object-cover" />
             </div>
             <h1 className="font-display text-2xl font-bold text-foreground font-serif">
-              <span style={{ color: '#8B5E3C' }}>Babita's</span>
-              <span style={{ color: '#7A9E7E', marginLeft: '6px' }}>Kitchen</span>
+              <span style={{ color: '#8B5E3C' }}>Welcome</span>
+              <span style={{ color: '#7A9E7E', marginLeft: '6px' }}>Back</span>
             </h1>
-            <p className="text-muted-foreground mt-2 text-sm">Welcome back! Please sign in.</p>
+            <p className="text-muted-foreground mt-2 text-sm">Sign in with your phone number</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <form onSubmit={handleSendOTP} className="p-8 space-y-6">
             {error && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -73,69 +105,56 @@ export default function Login() {
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground ml-1">Email</label>
+              <label className="text-sm font-medium text-foreground ml-1">Phone Number</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-12 pl-12 rounded-xl border-border/60 bg-background focus:ring-2 focus:ring-primary/30"
-                />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <div className="flex items-center">
+                  <span className="absolute left-12 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">+91</span>
+                  <Input
+                    type="tel"
+                    placeholder="9876543210"
+                    value={phone}
+                    onChange={handlePhoneChange}
+                    maxLength={10}
+                    required
+                    className="h-12 pl-20 rounded-xl border-border/60 bg-background focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground ml-1">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-12 pl-12 pr-12 rounded-xl border-border/60 bg-background focus:ring-2 focus:ring-primary/30"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="rounded border-border" />
-                <span className="text-muted-foreground">Remember me</span>
-              </label>
-              <Link href="/forgot-password" className="text-primary hover:underline font-medium">
-                Forgot password?
-              </Link>
+              <p className="text-xs text-muted-foreground ml-1">
+                Enter the 10-digit mobile number registered with your account
+              </p>
             </div>
 
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || phone.length !== 10}
               className="w-full h-12 rounded-xl text-white font-semibold text-lg shadow-md hover:shadow-lg transition-all"
               style={{ backgroundColor: '#7A9E7E' }}
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin mx-auto" />
               ) : (
-                "Sign In"
+                <>
+                  Send OTP
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </>
               )}
             </Button>
 
+            {/* Divider */}
+            <div className="flex items-center gap-4 my-6">
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <span className="text-sm text-muted-foreground">OR</span>
+              <div className="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            {/* Sign Up Link */}
             <div className="text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
-              <Link href="/signup" className="text-primary hover:underline font-semibold">
-                Sign up
+              <Link href="/signup" className="text-primary hover:underline font-semibold flex items-center justify-center gap-1 mt-2">
+                <UserPlus className="w-4 h-4" />
+                Create Account
               </Link>
             </div>
           </form>

@@ -6,7 +6,7 @@ export default function Story() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-28 overflow-hidden">
+      <section className="relative py-16 lg:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-amber-50/50 to-[#f8f6f2]" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
@@ -14,10 +14,10 @@ export default function Story() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 style={{ fontFamily: 'Poppins, sans-serif' }} className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 tracking-wide">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 sm:mb-6 tracking-wide">
               OUR <span style={{ color: '#800000' }}>STORY</span>
             </h1>
-            <p style={{ fontFamily: 'Playfair Display, serif' }} className="text-xl md:text-2xl text-secondary/80 font-medium leading-relaxed italic">
+            <p className="text-base sm:text-lg md:text-xl text-secondary/80 font-medium leading-relaxed italic px-2 sm:px-0">
               What began in 2020 as one woman's dream in her kitchen has blossomed into a powerful testament to female entrepreneurship.
             </p>
           </motion.div>
@@ -25,34 +25,34 @@ export default function Story() {
       </section>
 
       {/* Main Story Content */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-lg border border-border/30"
+            className="bg-white rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-8 md:p-12 shadow-lg border border-border/30"
           >
             <div className="prose prose-lg max-w-none">
-              <p style={{ fontFamily: 'Playfair Display, serif' }} className="text-xl leading-relaxed text-secondary/80 mb-8">
+              <p className="text-base sm:text-lg md:text-xl leading-relaxed text-secondary/80 mb-6 sm:mb-8">
                 Babita's unwavering spirit and culinary genius prove that when women support women, incredible things happen.
               </p>
 
-              <div className="my-10 p-8 bg-amber-50 rounded-3xl border border-amber-100">
-                <p style={{ fontFamily: 'Playfair Display, serif' }} className="text-lg leading-relaxed text-secondary/90 italic">
+              <div className="my-8 sm:my-10 p-6 sm:p-8 bg-amber-50 rounded-2xl border border-amber-100">
+                <p className="text-sm sm:text-base md:text-lg leading-relaxed text-secondary/90 italic">
                   "Every spice, every recipe, every dish carries the essence of feminine strength and nurturing love. We're not just selling food—we're sharing the legacy of generations of women who have preserved culture through cuisine, breaking barriers and building empires from their kitchens."
                 </p>
               </div>
 
-              <h2 style={{ fontFamily: 'Poppins, sans-serif' }} className="text-2xl md:text-3xl font-bold text-foreground mb-6 tracking-wide">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-4 sm:mb-6 tracking-wide">
                 OUR MISSION
               </h2>
-              <p style={{ fontFamily: 'Playfair Display, serif' }} className="text-lg leading-relaxed text-secondary/80 mb-8">
+              <p className="text-sm sm:text-base md:text-lg leading-relaxed text-secondary/80 mb-6 sm:mb-8">
                 Our mission transcends business. We're creating opportunities for women, celebrating female leadership, and proving that the kitchen isn't just where meals are made—it's where revolutions begin.
               </p>
 
-              <div className="my-10 p-8 bg-emerald-50 rounded-3xl border border-emerald-100">
-                <p style={{ fontFamily: 'Playfair Display, serif' }} className="text-lg leading-relaxed text-secondary/90 font-medium">
+              <div className="my-8 sm:my-10 p-6 sm:p-8 bg-emerald-50 rounded-2xl border border-emerald-100">
+                <p className="text-sm sm:text-base md:text-lg leading-relaxed text-secondary/90 font-medium">
                   When you choose Babita's Kitchen, you're investing in a woman's dream and supporting female-led enterprise.
                 </p>
               </div>
@@ -62,23 +62,23 @@ export default function Story() {
       </section>
 
       {/* Values Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            className="text-center mb-10 sm:mb-12"
           >
-            <h2 style={{ fontFamily: 'Poppins, sans-serif' }} className="text-3xl md:text-4xl font-bold text-foreground mb-4 tracking-wide">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 tracking-wide">
               WHAT WE STAND FOR
             </h2>
-            <p style={{ fontFamily: 'Playfair Display, serif' }} className="text-lg text-secondary/70 max-w-2xl mx-auto italic">
+            <p className="text-sm sm:text-base md:text-lg text-secondary/70 max-w-2xl mx-auto px-2">
               Our values guide everything we do, from sourcing ingredients to serving our community
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
               {
                 icon: Heart,
@@ -106,15 +106,15 @@ export default function Story() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="bg-[#f8f6f2] rounded-3xl p-6 text-center hover:shadow-lg transition-shadow"
+                className="bg-[#f8f6f2] rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-center hover:shadow-lg transition-shadow"
               >
-                <div className="w-14 h-14 bg-[#800000]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <value.icon className="w-7 h-7 text-[#800000]" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#800000]/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <value.icon className="w-6 h-6 sm:w-7 sm:h-7 text-[#800000]" />
                 </div>
-              <h3 style={{ fontFamily: 'Poppins, sans-serif' }} className="font-semibold text-lg text-foreground mb-2 tracking-wide">
+                <h3 className="font-semibold text-sm sm:text-base text-foreground mb-2 tracking-wide">
                   {value.title.toUpperCase()}
                 </h3>
-                <p style={{ fontFamily: 'Playfair Display, serif' }} className="text-sm text-secondary/70">
+                <p className="text-xs sm:text-sm text-secondary/70">
                   {value.description}
                 </p>
               </motion.div>
@@ -124,7 +124,7 @@ export default function Story() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-[#800000]/10 to-[#8B5E3C]/10" />
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <motion.div
@@ -132,10 +132,10 @@ export default function Story() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 style={{ fontFamily: 'Poppins, sans-serif' }} className="text-3xl md:text-4xl font-bold text-foreground mb-6 tracking-wide">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6 tracking-wide">
               JOIN OUR JOURNEY
             </h2>
-            <p style={{ fontFamily: 'Playfair Display, serif' }} className="text-lg text-secondary/80 mb-8 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-secondary/80 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
               Be part of something bigger. Every meal you order supports female entrepreneurship and keeps traditions alive.
             </p>
           </motion.div>

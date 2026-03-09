@@ -20,6 +20,7 @@ export const isSupabaseConfigured = () => !!(supabaseUrl && supabaseAnonKey);
 export interface User {
   id: string;
   email: string;
+  phone?: string;
   firstName?: string;
   lastName?: string;
   profileImageUrl?: string;
