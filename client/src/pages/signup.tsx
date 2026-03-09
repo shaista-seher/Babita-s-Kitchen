@@ -1,18 +1,34 @@
-import { useState } from "react";
-import { Link } from "wouter";
-import { Loader2, Phone, User, ArrowRight, Check } from "lucide-react";
+
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
+import { useAuth } from "@/context/auth-context";
+import { Loader2, Phone, User, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { motion } from "framer-motion";
 import bkLogo from "@assets/BK_logo_1772721148069.jpeg";
 
+type SignupStep = "details" | "otp" | "success";
+
 export default function Signup() {
+  const [step, setStep] = useState<SignupStep>("details");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  
+  const { signUp, verifyOTP, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+
+  // Redirect if already authenticated
+  if (isAuthenticated) {
+    setLocation("/home");
+    return null;
+  }
 
   const formatPhoneNumber = (value: string) => {
     const digits = value.replace(/\D/g, "");
@@ -24,7 +40,7 @@ export default function Signup() {
     setPhone(formatted);
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -40,16 +56,58 @@ export default function Signup() {
 
     setIsLoading(true);
 
-    // Simulate signup - in production, call your API
-    setTimeout(() => {
-      localStorage.setItem("auth_token", "logged_in_" + Date.now());
-      localStorage.setItem("user_phone", "+91" + phone);
-      localStorage.setItem("user_name", `${firstName} ${lastName}`.trim());
-      setSuccess(true);
-    }, 500);
+    // Simulate sending OTP
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    sessionStorage.setItem('pendingPhone', phone);
+    sessionStorage.setItem('signupName', `${firstName} ${lastName}`.trim());
+    setStep("otp");
+    setResendTimer(30);
+    setIsLoading(false);
   };
 
-  if (success) {
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (otp.length !== 6) {
+      setError("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    setIsLoading(true);
+
+    // First create the account
+    await signUp(firstName, lastName, phone);
+    
+    // Then verify OTP
+    const { error: verifyError } = await verifyOTP(phone, otp);
+    
+    if (verifyError) {
+      setError(verifyError.message);
+      setIsLoading(false);
+    } else {
+      setStep("success");
+    }
+  };
+
+  const handleResend = async () => {
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setResendTimer(30);
+    setIsLoading(false);
+  };
+
+  // Countdown for resend
+  useEffect(() => {
+    if (step === "otp" && resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, resendTimer]);
+
+  // Success Step
+  if (step === "success") {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F8F4EC' }}>
         <motion.div
@@ -66,10 +124,10 @@ export default function Signup() {
               <span style={{ color: '#7A9E7E', marginLeft: '6px' }}>aboard!</span>
             </h1>
             <p className="text-muted-foreground mb-6">
-              Your account has been created. Please set your delivery location.
+              Your account has been created successfully. Let's set up your delivery location.
             </p>
             <Button
-              onClick={() => window.location.reload()}
+              onClick={() => setLocation("/location")}
               className="w-full h-12 rounded-xl text-white font-semibold"
               style={{ backgroundColor: '#7A9E7E' }}
             >
@@ -82,11 +140,124 @@ export default function Signup() {
     );
   }
 
+  // OTP Verification Step
+  if (step === "otp") {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F8F4EC' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-full max-w-md"
+        >
+          <div className="bg-white rounded-[2.5rem] shadow-xl border border-border/30 overflow-hidden">
+            {/* Header */}
+            <div className="p-8 pb-6 text-center relative" style={{ backgroundColor: 'rgba(122, 158, 126, 0.1)' }}>
+              <button
+                onClick={() => setStep("details")}
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-black/5 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-foreground" />
+              </button>
+              
+              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden shadow-md">
+                <img src={bkLogo} alt="Babita's Kitchen" className="w-full h-full object-cover" />
+              </div>
+              <h1 className="font-display text-2xl font-bold text-foreground font-serif">
+                <span style={{ color: '#8B5E3C' }}>Verify</span>
+                <span style={{ color: '#7A9E7E', marginLeft: '6px' }}>OTP</span>
+              </h1>
+              <p className="text-muted-foreground mt-2 text-sm">
+                Enter the 6-digit code sent to
+              </p>
+              <p className="text-foreground font-medium mt-1">
+                +91 {phone}
+              </p>
+              <p className="text-xs text-green-600 mt-2">
+                Demo: Use OTP 123456
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleVerifyOTP} className="p-8 space-y-6">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm"
+                >
+                  {error}
+                </motion.div>
+              )}
+
+              {/* OTP Input */}
+              <div className="space-y-4">
+                <label className="text-sm font-medium text-foreground ml-1 block text-center">
+                  Enter OTP
+                </label>
+                <div className="flex justify-center">
+                  <InputOTP
+                    value={otp}
+                    onChange={(value) => setOtp(value)}
+                    maxLength={6}
+                    className="gap-2"
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={1} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={2} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={3} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={4} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={5} className="w-12 h-12 text-lg" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isLoading || otp.length !== 6}
+                className="w-full h-12 rounded-xl text-white font-semibold text-lg shadow-md hover:shadow-lg transition-all"
+                style={{ backgroundColor: '#7A9E7E' }}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                ) : (
+                  "Verify & Create Account"
+                )}
+              </Button>
+
+              {/* Resend Section */}
+              <div className="text-center space-y-2">
+                {resendTimer > 0 ? (
+                  <p className="text-muted-foreground text-sm">
+                    Resend OTP in <span className="font-medium text-foreground">{resendTimer}s</span>
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={isLoading}
+                    className="text-sm text-primary hover:underline font-medium"
+                  >
+                    Resend OTP
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Initial Details Step
   return (
     <div className="min-h-screen flex items-center justify-center p-4 py-12" style={{ backgroundColor: '#F8F4EC' }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-md"
       >
         <div className="bg-white rounded-[2.5rem] shadow-xl border border-border/30 overflow-hidden">
@@ -103,7 +274,7 @@ export default function Signup() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSignup} className="p-8 space-y-5">
+          <form onSubmit={handleSendOTP} className="p-8 space-y-5">
             {error && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -154,7 +325,7 @@ export default function Signup() {
                     onChange={handlePhoneChange}
                     maxLength={10}
                     required
-                    className="h-12 pl-20 rounded-xl border-border/60 bg-background"
+                    className="h-12 pl-20 rounded-xl border-border/60 bg-background focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
               </div>
@@ -163,14 +334,14 @@ export default function Signup() {
             <Button
               type="submit"
               disabled={isLoading || phone.length !== 10 || !firstName.trim()}
-              className="w-full h-12 rounded-xl text-white font-semibold text-lg"
+              className="w-full h-12 rounded-xl text-white font-semibold text-lg shadow-md hover:shadow-lg transition-all"
               style={{ backgroundColor: '#7A9E7E' }}
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin mx-auto" />
               ) : (
                 <>
-                  Create Account
+                  Send OTP
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
