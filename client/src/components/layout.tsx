@@ -246,7 +246,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </SheetContent>
             </Sheet>
-            </Button>
           </div>
         </div>
       </header>
@@ -284,7 +283,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div>
               <h4 className="font-display font-semibold mb-6" style={{ color: '#800000' }}>Support</h4>
               <ul className="space-y-4" style={{ color: '#A0522D' }}>
-                <li><a href="mailto:contact@babitaskitchen.com" className="hover:opacity-80 transition-opacity">Contact Us</Link></li>
+                <li><a href="mailto:contact@babitaskitchen.com" className="hover:opacity-80 transition-opacity">Contact Us</a></li>
                 <li><Link href="/#faq" className="hover:opacity-80 transition-opacity">FAQ</Link></li>
                 <li><Link href="/#delivery" className="hover:opacity-80 transition-opacity">Delivery Info</Link></li>
               </ul>
