@@ -95,7 +95,7 @@ function OpeningVideo({ onComplete }: { onComplete?: () => void }) {
 
 // Main Router with auth handling
 function MainRouter() {
-  const [showVideo, setShowVideo] = useState(false);
+  const [showVideo, setShowVideo] = useState(true);
   const [location] = useLocation();
   const { isAuthenticated } = useAuth();
   
