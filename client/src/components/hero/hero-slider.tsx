@@ -1,5 +1,6 @@
  import { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface HeroSliderProps {
   className?: string;
@@ -46,11 +47,67 @@ const SLIDE_CONTENT = [
 
 export function HeroSlider({ className = "" }: HeroSliderProps) {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Animation variants for text moving from bottom to top
+  const textVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 50, 
+      scale: 0.95 
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut",
+        staggerChildren: 0.2
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -50, 
+      scale: 0.95,
+      transition: {
+        duration: 0.6,
+        ease: "easeIn"
+      }
+    }
+  };
+
+  const imageVariants = {
+    hidden: { 
+      opacity: 0, 
+      scale: 1.1 
+    },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      transition: {
+        duration: 1.2,
+        ease: "easeOut"
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      scale: 0.9,
+      transition: {
+        duration: 0.8,
+        ease: "easeIn"
+      }
+    }
+  };
 
   // Handle navigation
   const goToSlide = useCallback((slideIndex: number) => {
     if (slideIndex !== activeSlide) {
-      setActiveSlide(slideIndex);
+      setIsAnimating(true);
+      setTimeout(() => {
+        setActiveSlide(slideIndex);
+        setIsAnimating(false);
+      }, 100);
     }
   }, [activeSlide]);
 
@@ -70,44 +127,72 @@ export function HeroSlider({ className = "" }: HeroSliderProps) {
       className={`relative h-[40vh] md:h-[70vh] w-full overflow-hidden ${className}`}
       id="specials"
     >
-      {/* Full Background - Switch images instantly without fade */}
+      {/* Full Background - Animated transitions */}
       <div className="absolute inset-0 z-0">
-        {HERO_BACKGROUNDS.map((src, index) => (
-          <img
-            key={index}
-            src={src}
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={activeSlide}
+            src={HERO_BACKGROUNDS[activeSlide]}
             alt="Babita's Kitchen"
-            className={`absolute inset-0 w-full h-full object-cover ${
-              index === activeSlide ? "block" : "hidden"
-            }`}
+            className="absolute inset-0 w-full h-full object-cover"
+            variants={imageVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
           />
-        ))}
+        </AnimatePresence>
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/50" />
       </div>
 
       {/* Main Content */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center px-8">
-        {/* Text Content - Centered */}
+        {/* Text Content - Centered with animations */}
         <div className="max-w-2xl text-center">
-          <div className="text-center">
-            {activeSlide === 0 ? (
-              <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4 drop-shadow-lg">
-                {content.title}
-                <span className={`text-amber-300 ${content.isItalic ? 'italic' : ''}`}>{content.subtitle}</span>
-              </h1>
-            ) : (
-              <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                {content.title}
-                <span className={activeSlide === 3 ? "text-red-400" : "text-amber-300"}>
-                  {content.subtitle}
-                </span>
-              </h2>
-            )}
-            <p className="text-lg text-white/90 drop-shadow">
-              {content.text}
-            </p>
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSlide}
+              className="text-center"
+              variants={textVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              {activeSlide === 0 ? (
+                <motion.h1 
+                  className="text-4xl lg:text-6xl font-bold text-white mb-4 drop-shadow-lg"
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  {content.title}
+                  <motion.span 
+                    className={`text-amber-300 ${content.isItalic ? 'italic' : ''}`}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
+                    {content.subtitle}
+                  </motion.span>
+                </motion.h1>
+              ) : (
+                <motion.h2 
+                  className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg"
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  {content.title}
+                  <motion.span 
+                    className={activeSlide === 3 ? "text-red-400" : "text-amber-300"}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
+                    {content.subtitle}
+                  </motion.span>
+                </motion.h2>
+              )}
+              <motion.p 
+                className="text-lg text-white/90 drop-shadow"
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                {content.text}
+              </motion.p>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Navigation */}
