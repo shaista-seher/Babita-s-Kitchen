@@ -1,10 +1,9 @@
 {
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "npm run client:build",
+  "outputDirectory": "dist/public",
   "installCommand": "npm install",
   "framework": "vite",
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
-
