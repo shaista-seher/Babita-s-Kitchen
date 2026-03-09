@@ -1,7 +1,6 @@
-import { useState } from "react";
+ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/auth-context";
-import { useLocation as useUserLocation } from "@/context/location-context";
 import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,6 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   
   const { signIn, isAuthenticated } = useAuth();
-  const { requestLocation } = useUserLocation();
   const [, setLocation] = useLocation();
 
   // Redirect if already authenticated
@@ -36,9 +34,8 @@ export default function Login() {
       setError(error.message);
       setIsLoading(false);
     } else {
-      // Request location after successful login
-      requestLocation();
-      setLocation("/home");
+      // Redirect to home page (will check for location)
+      setLocation("/");
     }
   };
 

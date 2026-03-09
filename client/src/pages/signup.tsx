@@ -52,8 +52,7 @@ export default function Signup() {
       setIsLoading(false);
     } else {
       setSuccess(true);
-      // Request location after successful signup
-      requestLocation();
+      // After signup, redirect to login which will go to location check
     }
   };
 
