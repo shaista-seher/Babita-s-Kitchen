@@ -74,10 +74,11 @@ function OpeningVideo({ onComplete }: { onComplete?: () => void }) {
       
       <video
         id="opening-video"
-        className="w-full h-full object-contain"
+        className="w-full h-full object-cover"
         playsInline
         muted
         autoPlay
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
       >
         <source src="/opening-video.mp4" type="video/mp4" />
       </video>
