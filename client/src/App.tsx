@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route, useLocation as useWouterLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -21,7 +21,68 @@ import Signup from "@/pages/signup";
 import ForgotPassword from "@/pages/forgot-password";
 import Story from "@/pages/story";
 
+// Opening Video Component
+function OpeningVideo() {
+  const [, setRoute] = useWouterLocation();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const video = document.getElementById('opening-video') as HTMLVideoElement;
+    if (!video) return;
+
+    localStorage.setItem("hasSeenOpening", "true");
+
+    video.addEventListener('canplay', () => setIsLoading(false));
+    video.addEventListener('ended', () => setRoute("/login"));
+    
+    video.play().catch(() => {
+      // Auto redirect if video fails
+      setRoute("/login");
+    });
+
+    return () => {
+      video.removeEventListener('canplay', () => {});
+      video.removeEventListener('ended', () => {});
+    };
+  }, [setRoute]);
+
+  const handleSkip = () => {
+    setRoute("/login");
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
+      
+      <video
+        id="opening-video"
+        className="w-full h-full object-contain"
+        playsInline
+        muted
+      >
+        <source src="/opening-video.mp4" type="video/mp4" />
+      </video>
+
+      <button
+        onClick={handleSkip}
+        className="absolute bottom-8 right-8 px-6 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium hover:bg-white/30 transition-colors"
+      >
+        Skip →
+      </button>
+    </div>
+  );
+}
+
 function Router() {
+  const [showVideo, setShowVideo] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !localStorage.getItem("hasSeenOpening");
+  });
+  
   const [isAuthenticated] = useState(() => {
     if (typeof window === "undefined") return false;
     return !!localStorage.getItem("auth_token");
@@ -29,6 +90,11 @@ function Router() {
   
   const { location } = useUserLocation();
   const [, setRoute] = useWouterLocation();
+
+  // Show opening video first
+  if (showVideo) {
+    return <OpeningVideo />;
+  }
 
   // Show login if not authenticated
   if (!isAuthenticated) {
