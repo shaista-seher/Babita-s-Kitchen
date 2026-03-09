@@ -1,4 +1,4 @@
-# Layout Changes TODO - COMPLETED
+ # Layout Changes TODO - COMPLETED
 
 ## Phase 1: Phone OTP Authentication - COMPLETED
 - [x] 1. Updated login.tsx - Phone number input + OTP option

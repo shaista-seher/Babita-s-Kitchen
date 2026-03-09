@@ -10,10 +10,10 @@
     --font-display: 'Poppins', sans-serif;
     --font-serif: 'Playfair Display', serif;
 
-    /* Maroon background for website */
-    --background: 0 50% 25%;
-    /* White text for readability on maroon */
-    --foreground: 0 0% 100%;
+    /* Light cream background for website */
+    --background: 40 20% 96%;
+    /* Dark text for readability on light backgrounds */
+    --foreground: 26 19% 24%;
     
     /* White cards floating on cream */
     --card: 0 0% 100%;
@@ -63,5 +63,23 @@ body {
   
   .premium-shadow {
     @apply shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.1)] transition-shadow duration-300;
+  }
+  
+  /* OTP Input Styles */
+  .otp-input {
+    @apply w-12 h-12 text-lg text-center border-2 border-gray-300 rounded-xl bg-white text-gray-800 font-semibold;
+  }
+  
+  .otp-input:focus {
+    @apply border-green-500 ring-2 ring-green-200 outline-none;
+  }
+  
+  /* Ensure input text is visible */
+  input[type="text"],
+  input[type="tel"],
+  input[type="email"],
+  input[type="password"],
+  input {
+    @apply text-gray-800;
   }
 }

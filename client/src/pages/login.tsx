@@ -1,12 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/auth-context";
 import { Loader2, Phone, ArrowRight, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import bkLogo from "@assets/BK_logo_1772721148069.jpeg";
 
 type LoginStep = "phone" | "otp";
@@ -19,14 +19,15 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [resendTimer, setResendTimer] = useState(0);
   
-  const { verifyOTP, isAuthenticated } = useAuth();
+  const { verifyOTP } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Redirect if already authenticated
-  if (isAuthenticated) {
-    setLocation("/home");
-    return null;
-  }
+  // Check auth directly from localStorage to redirect to home
+  useEffect(() => {
+    if (localStorage.getItem("auth_token")) {
+      setLocation("/home");
+    }
+  }, [setLocation]);
 
   const formatPhoneNumber = (value: string) => {
     const digits = value.replace(/\D/g, "");
@@ -75,8 +76,12 @@ export default function Login() {
       setError(verifyError.message);
       setIsLoading(false);
     } else {
-      // Success - redirect to location
-      setLocation("/location");
+      // Dispatch custom event for auth change
+      window.dispatchEvent(new Event('auth-change'));
+      // Success - redirect directly to home with slight delay to ensure auth state updates
+      setTimeout(() => {
+        window.location.href = "/home";
+      }, 200);
     }
   };
 
@@ -88,12 +93,12 @@ export default function Login() {
   };
 
   // Countdown for resend
-  useState(() => {
+  useEffect(() => {
     if (step === "otp" && resendTimer > 0) {
       const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
       return () => clearTimeout(timer);
     }
-  });
+  }, [step, resendTimer]);
 
   // OTP Verification Step
   if (step === "otp") {
@@ -157,12 +162,12 @@ export default function Login() {
                     className="gap-2"
                   >
                     <InputOTPGroup>
-                      <InputOTPSlot index={0} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={1} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={2} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={3} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={4} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={5} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
@@ -250,11 +255,11 @@ export default function Login() {
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground ml-1">Phone Number</label>
+              <label className="text-sm font-medium text-gray-800 ml-1">Phone Number</label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
                 <div className="flex items-center">
-                  <span className="absolute left-12 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">+91</span>
+                  <span className="absolute left-12 top-1/2 -translate-y-1/2 text-gray-600 font-medium">+91</span>
                   <Input
                     type="tel"
                     placeholder="9876543210"
@@ -262,7 +267,7 @@ export default function Login() {
                     onChange={handlePhoneChange}
                     maxLength={10}
                     required
-                    className="h-12 pl-20 rounded-xl border-border/60 bg-background"
+                    className="h-12 pl-20 rounded-xl border-gray-300 bg-white text-gray-800"
                   />
                 </div>
               </div>
@@ -290,13 +295,14 @@ export default function Login() {
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
-            <div className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link href="/signup" className="text-primary hover:underline font-semibold flex items-center justify-center gap-1 mt-2">
-                <UserPlus className="w-4 h-4" />
-                Create Account
-              </Link>
-            </div>
+            <Button
+              onClick={() => setLocation("/signup")}
+              variant="outline"
+              className="w-full h-12 rounded-xl border-2 border-green-500 text-green-600 font-semibold hover:bg-green-50"
+            >
+              <UserPlus className="w-5 h-5 mr-2" />
+              Create New Account
+            </Button>
           </form>
         </div>
       </motion.div>

@@ -1,17 +1,14 @@
-
 import { useState, useEffect } from "react";
-import { Switch, Route, useLocation as useWouterLocation } from "wouter";
+import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/cart-context";
-import { LocationProvider, useLocation as useUserLocation } from "./context/location-context";
-import { AuthProvider } from "./context/auth-context";
+import { LocationProvider } from "./context/location-context";
+import { AuthProvider, useAuth } from "./context/auth-context";
 import NotFound from "@/pages/not-found";
-import { Loader2, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 import Home from "@/pages/home";
@@ -25,37 +22,50 @@ import Story from "@/pages/story";
 
 // Opening Video Component
 function OpeningVideo({ onComplete }: { onComplete?: () => void }) {
-  const [, setRoute] = useWouterLocation();
+  const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(true);
+  const [isFading, setIsFading] = useState(false);
 
   useEffect(() => {
     const video = document.getElementById('opening-video') as HTMLVideoElement;
     if (!video) return;
 
     video.addEventListener('canplay', () => setIsLoading(false));
-    video.addEventListener('ended', () => {
-      if (onComplete) onComplete();
-      setRoute("/login");
-    });
+    video.addEventListener('ended', handleVideoEnd);
     
     video.play().catch(() => {
-      if (onComplete) onComplete();
-      setRoute("/login");
+      handleVideoEnd();
     });
 
     return () => {
-      video.removeEventListener('canplay', () => {});
-      video.removeEventListener('ended', () => {});
+      video.removeEventListener('canplay', () => setIsLoading(false));
+      video.removeEventListener('ended', handleVideoEnd);
     };
-  }, [setRoute, onComplete]);
+  }, []);
+
+  const handleVideoEnd = () => {
+    setIsFading(true);
+    setTimeout(() => {
+      if (onComplete) onComplete();
+      setLocation("/login");
+    }, 1000);
+  };
 
   const handleSkip = () => {
-    if (onComplete) onComplete();
-    setRoute("/login");
+    setIsFading(true);
+    setTimeout(() => {
+      if (onComplete) onComplete();
+      setLocation("/login");
+    }, 1000);
   };
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+    <motion.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: isFading ? 0 : 1 }}
+      transition={{ duration: 1, ease: "easeInOut" }}
+      className="fixed inset-0 bg-black z-50 flex items-center justify-center"
+    >
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
@@ -74,157 +84,113 @@ function OpeningVideo({ onComplete }: { onComplete?: () => void }) {
 
       <button
         onClick={handleSkip}
-        className="absolute bottom-8 right-8 px-6 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium hover:bg-white/30 transition-colors"
+        className="absolute bottom-8 right-8 px-6 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium hover:bg-white/30 transition-colors z-50"
       >
         Skip →
       </button>
-    </div>
+    </motion.div>
   );
 }
 
-function Router() {
-  const [showVideo, setShowVideo] = useState(true);
+// Main Router with auth handling
+function MainRouter() {
+  const [showVideo, setShowVideo] = useState(false);
+  const [location] = useLocation();
+  const { isAuthenticated } = useAuth();
   
-  const [isAuthenticated] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return !!localStorage.getItem("auth_token");
-  });
-  
-  const { location } = useUserLocation();
-  const [, setRoute] = useWouterLocation();
+  // Force re-render when auth changes
+  const [, setAuthCheck] = useState(0);
 
+  // Check if user has seen video
+  useEffect(() => {
+    const seenVideo = localStorage.getItem("hasSeenVideo");
+    if (!seenVideo) {
+      setShowVideo(true);
+      localStorage.setItem("hasSeenVideo", "true");
+    }
+  }, []);
+
+  // Listen for auth changes
+  useEffect(() => {
+    const handleAuthChange = () => {
+      setAuthCheck(n => n + 1);
+    };
+    
+    // Listen for custom auth change event
+    window.addEventListener('auth-change', handleAuthChange);
+    window.addEventListener('storage', handleAuthChange);
+    // Also poll for changes (for same-tab updates)
+    const interval = setInterval(handleAuthChange, 300);
+    
+    return () => {
+      window.removeEventListener('auth-change', handleAuthChange);
+      window.removeEventListener('storage', handleAuthChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Check auth from localStorage directly
+  const isAuth = isAuthenticated || !!localStorage.getItem("auth_token");
+
+  // Show video first
   if (showVideo) {
-    return <OpeningVideo onComplete={() => setShowVideo(false)} />;
+    return <OpeningVideo onComplete={() => { setShowVideo(false); }} />;
   }
 
-  if (!isAuthenticated) {
-    return <Login />;
+  // If not authenticated, show login
+  if (!isAuth) {
+    return (
+      <Switch>
+        <Route path="/login">
+          <Login />
+        </Route>
+        <Route path="/signup">
+          <Signup />
+        </Route>
+        <Route path="/forgot-password">
+          <ForgotPassword />
+        </Route>
+        <Route>
+          <Login />
+        </Route>
+      </Switch>
+    );
   }
 
-  if (!location) {
-    return <LocationSelection />;
-  }
-
+  // Authenticated routes - redirect to home
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/home" component={Home} />
-      <Route path="/login" component={Login} />
-      <Route path="/signup" component={Signup} />
-      <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/product/:id" component={ProductDetails} />
-      <Route path="/story" component={Story} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/profile" component={Profile} />
-      <Route component={NotFound} />
+      <Route path="/">
+        <Home />
+      </Route>
+      <Route path="/home">
+        <Home />
+      </Route>
+      <Route path="/login">
+        <Login />
+      </Route>
+      <Route path="/signup">
+        <Signup />
+      </Route>
+      <Route path="/forgot-password">
+        <ForgotPassword />
+      </Route>
+      <Route path="/product/:id">
+        <ProductDetails />
+      </Route>
+      <Route path="/story">
+        <Story />
+      </Route>
+      <Route path="/cart">
+        <Cart />
+      </Route>
+      <Route path="/profile">
+        <Profile />
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
-  );
-}
-
-function LocationSelection() {
-  const { requestLocation, searchLocation, isLoading, error, location } = useUserLocation();
-  const [, setRoute] = useWouterLocation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
-
-  const handleRequestLocation = () => {
-    requestLocation();
-  };
-
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      await searchLocation(searchQuery);
-    }
-  };
-
-  if (location) {
-    setRoute("/home");
-    return null;
-  }
-
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F8F4EC' }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
-        <div className="bg-white rounded-[2.5rem] shadow-xl border border-border/30 overflow-hidden p-8">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden shadow-md bg-green-100 flex items-center justify-center">
-              <MapPin className="w-10 h-10 text-green-600" />
-            </div>
-            <h1 className="font-display text-2xl font-bold text-foreground font-serif">
-              <span style={{ color: '#8B5E3C' }}>Select</span>
-              <span style={{ color: '#7A9E7E', marginLeft: '6px' }}>Location</span>
-            </h1>
-            <p className="text-muted-foreground mt-2 text-sm">We need your location to deliver delicious food!</p>
-          </div>
-
-          {error && (
-            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm mb-4">
-              {error}
-            </div>
-          )}
-
-          <div className="space-y-4">
-            <Button
-              onClick={handleRequestLocation}
-              disabled={isLoading}
-              className="w-full h-14 rounded-xl text-white font-semibold text-lg"
-              style={{ backgroundColor: '#7A9E7E' }}
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-              ) : (
-                <>
-                  <MapPin className="w-5 h-5 mr-2" />
-                  Use Current Location
-                </>
-              )}
-            </Button>
-
-            <div className="flex items-center gap-4 my-6">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-sm text-muted-foreground">OR</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
-
-            <button
-              onClick={() => setShowSearch(!showSearch)}
-              className="w-full h-14 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 font-semibold text-lg hover:border-green-500 hover:text-green-600 transition-colors"
-            >
-              Search by Address
-            </button>
-
-            {showSearch && (
-              <form onSubmit={handleSearch} className="space-y-4 mt-4">
-                <Input
-                  type="text"
-                  placeholder="Enter your address..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-12 rounded-xl border-border/60"
-                />
-                <Button
-                  type="submit"
-                  disabled={isLoading || !searchQuery.trim()}
-                  className="w-full h-12 rounded-xl text-white font-semibold"
-                  style={{ backgroundColor: '#8B5E3C' }}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                  ) : (
-                    "Search"
-                  )}
-                </Button>
-              </form>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    </div>
   );
 }
 
@@ -236,7 +202,7 @@ function App() {
           <LocationProvider>
             <CartProvider>
               <Toaster />
-              <Router />
+              <MainRouter />
             </CartProvider>
           </LocationProvider>
         </AuthProvider>
@@ -246,4 +212,3 @@ function App() {
 }
 
 export default App;
-

@@ -21,14 +21,14 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [resendTimer, setResendTimer] = useState(0);
   
-  const { signUp, verifyOTP, isAuthenticated } = useAuth();
+  const { signUp, verifyOTP } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Redirect if already authenticated
-  if (isAuthenticated) {
-    setLocation("/home");
-    return null;
-  }
+  useEffect(() => {
+    if (localStorage.getItem("auth_token")) {
+      setLocation("/home");
+    }
+  }, [setLocation]);
 
   const formatPhoneNumber = (value: string) => {
     const digits = value.replace(/\D/g, "");
@@ -56,7 +56,6 @@ export default function Signup() {
 
     setIsLoading(true);
 
-    // Simulate sending OTP
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     sessionStorage.setItem('pendingPhone', phone);
@@ -77,17 +76,19 @@ export default function Signup() {
 
     setIsLoading(true);
 
-    // First create the account
     await signUp(firstName, lastName, phone);
     
-    // Then verify OTP
-    const { error: verifyError } = await verifyOTP(phone, otp);
+    const result = await verifyOTP(phone, otp);
     
-    if (verifyError) {
-      setError(verifyError.message);
+    if (result.error) {
+      setError(result.error.message);
       setIsLoading(false);
     } else {
-      setStep("success");
+      window.dispatchEvent(new Event('auth-change'));
+      // Redirect to home after successful signup with delay
+      setTimeout(() => {
+        window.location.href = "/home";
+      }, 200);
     }
   };
 
@@ -98,7 +99,6 @@ export default function Signup() {
     setIsLoading(false);
   };
 
-  // Countdown for resend
   useEffect(() => {
     if (step === "otp" && resendTimer > 0) {
       const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
@@ -106,7 +106,6 @@ export default function Signup() {
     }
   }, [step, resendTimer]);
 
-  // Success Step
   if (step === "success") {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F8F4EC' }}>
@@ -124,14 +123,14 @@ export default function Signup() {
               <span style={{ color: '#7A9E7E', marginLeft: '6px' }}>aboard!</span>
             </h1>
             <p className="text-muted-foreground mb-6">
-              Your account has been created successfully. Let's set up your delivery location.
+              Your account has been created successfully. Let's start ordering!
             </p>
             <Button
-              onClick={() => setLocation("/location")}
+              onClick={() => setLocation("/home")}
               className="w-full h-12 rounded-xl text-white font-semibold"
               style={{ backgroundColor: '#7A9E7E' }}
             >
-              Set Location
+              Go to Home
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </div>
@@ -140,7 +139,6 @@ export default function Signup() {
     );
   }
 
-  // OTP Verification Step
   if (step === "otp") {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F8F4EC' }}>
@@ -151,7 +149,6 @@ export default function Signup() {
           className="w-full max-w-md"
         >
           <div className="bg-white rounded-[2.5rem] shadow-xl border border-border/30 overflow-hidden">
-            {/* Header */}
             <div className="p-8 pb-6 text-center relative" style={{ backgroundColor: 'rgba(122, 158, 126, 0.1)' }}>
               <button
                 onClick={() => setStep("details")}
@@ -178,7 +175,6 @@ export default function Signup() {
               </p>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleVerifyOTP} className="p-8 space-y-6">
               {error && (
                 <motion.div
@@ -190,7 +186,6 @@ export default function Signup() {
                 </motion.div>
               )}
 
-              {/* OTP Input */}
               <div className="space-y-4">
                 <label className="text-sm font-medium text-foreground ml-1 block text-center">
                   Enter OTP
@@ -203,12 +198,12 @@ export default function Signup() {
                     className="gap-2"
                   >
                     <InputOTPGroup>
-                      <InputOTPSlot index={0} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={1} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={2} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={3} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={4} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={5} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
@@ -227,7 +222,6 @@ export default function Signup() {
                 )}
               </Button>
 
-              {/* Resend Section */}
               <div className="text-center space-y-2">
                 {resendTimer > 0 ? (
                   <p className="text-muted-foreground text-sm">
@@ -251,7 +245,6 @@ export default function Signup() {
     );
   }
 
-  // Initial Details Step
   return (
     <div className="min-h-screen flex items-center justify-center p-4 py-12" style={{ backgroundColor: '#F8F4EC' }}>
       <motion.div
@@ -261,7 +254,6 @@ export default function Signup() {
         className="w-full max-w-md"
       >
         <div className="bg-white rounded-[2.5rem] shadow-xl border border-border/30 overflow-hidden">
-          {/* Header */}
           <div className="p-8 pb-6 text-center" style={{ backgroundColor: 'rgba(122, 158, 126, 0.1)' }}>
             <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden shadow-md">
               <img src={bkLogo} alt="Babita's Kitchen" className="w-full h-full object-cover" />
@@ -273,7 +265,6 @@ export default function Signup() {
             <p className="text-muted-foreground mt-2 text-sm">Join us for authentic homemade food!</p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSendOTP} className="p-8 space-y-5">
             {error && (
               <motion.div
@@ -285,39 +276,37 @@ export default function Signup() {
               </motion.div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground ml-1">First Name</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="First Name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                    className="h-12 pl-12 rounded-xl border-border/60 bg-background"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground ml-1">Last Name</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-800 ml-1">First Name</label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
                 <Input
                   type="text"
-                  placeholder="Last Name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="h-12 rounded-xl border-border/60 bg-background"
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  className="h-12 pl-12 rounded-xl border-gray-300 bg-white text-gray-800"
                 />
               </div>
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-800 ml-1">Last Name</label>
+              <Input
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="h-12 rounded-xl border-gray-300 bg-white text-gray-800"
+              />
+            </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground ml-1">Phone Number</label>
+              <label className="text-sm font-medium text-gray-800 ml-1">Phone Number</label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
                 <div className="flex items-center">
-                  <span className="absolute left-12 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">+91</span>
+                  <span className="absolute left-12 top-1/2 -translate-y-1/2 text-gray-600 font-medium">+91</span>
                   <Input
                     type="tel"
                     placeholder="9876543210"
@@ -325,7 +314,7 @@ export default function Signup() {
                     onChange={handlePhoneChange}
                     maxLength={10}
                     required
-                    className="h-12 pl-20 rounded-xl border-border/60 bg-background focus:ring-2 focus:ring-primary/30"
+                    className="h-12 pl-20 rounded-xl border-gray-300 bg-white text-gray-800 focus:ring-2 focus:ring-green-200"
                   />
                 </div>
               </div>
@@ -347,12 +336,13 @@ export default function Signup() {
               )}
             </Button>
 
-            <div className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline font-semibold">
-                Sign in
-              </Link>
-            </div>
+            <Button
+              onClick={() => setLocation("/login")}
+              variant="ghost"
+              className="w-full text-muted-foreground"
+            >
+              Already have an account? Sign In
+            </Button>
           </form>
         </div>
       </motion.div>
