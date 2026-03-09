@@ -1,27 +1,23 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/context/auth-context";
-import { Loader2, Phone, User, ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { Loader2, Phone, User, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { motion } from "framer-motion";
 import bkLogo from "@assets/BK_logo_1772721148069.jpeg";
 
-type SignupStep = "details" | "otp" | "success";
-
 export default function Signup() {
-  const [step, setStep] = useState<SignupStep>("details");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [resendTimer, setResendTimer] = useState(30);
+  const [success, setSuccess] = useState(false);
   
-  const { signUp, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Check for existing auth
+  const isAuthenticated = typeof window !== "undefined" && localStorage.getItem("auth_token");
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -39,7 +35,7 @@ export default function Signup() {
     setPhone(formatted);
   };
 
-  const handleSendOTP = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -56,101 +52,22 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: `+91${phone}`, channel: "sms", purpose: "verify" }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to send OTP");
-      }
-
-      sessionStorage.setItem("pendingPhone", `+91${phone}`);
-      sessionStorage.setItem("signupName", `${firstName} ${lastName}`.trim());
-      setStep("otp");
-      setResendTimer(30);
-    } catch (err: any) {
-      setError(err.message || "Failed to send OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (otp.length !== 6) {
-      setError("Please enter a valid 6-digit OTP");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: `+91${phone}`, otp, name: `${firstName} ${lastName}`.trim() }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid OTP");
-      }
-
-      // Store token
-      if (data.token) {
-        localStorage.setItem("auth_token", data.token);
-      }
+      // For demo: Simulate signup with phone number
+      const demoToken = `phone_token_${phone}_${Date.now()}`;
+      localStorage.setItem("auth_token", demoToken);
+      localStorage.setItem("user_phone", `+91${phone}`);
+      localStorage.setItem("user_name", `${firstName} ${lastName}`.trim());
       
-      setStep("success");
+      setSuccess(true);
     } catch (err: any) {
-      setError(err.message || "Verification failed. Please try again.");
+      setError(err.message || "Signup failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-
-  const handleResend = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: `+91${phone}`, channel: "sms" }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to send OTP");
-      }
-
-      setResendTimer(30);
-    } catch (err: any) {
-      setError(err.message || "Failed to resend OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Countdown timer effect
-  useState(() => {
-    if (step === "otp" && resendTimer > 0) {
-      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  });
 
   // Success Step
-  if (step === "success") {
+  if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F8F4EC' }}>
         <motion.div
@@ -164,7 +81,7 @@ export default function Signup() {
             </div>
             <h1 className="font-display text-2xl font-bold text-foreground mb-4">
               <span style={{ color: '#8B5E3C' }}>Welcome</span>
-              <span style={{ color: '#7A9E7E', marginLeft: '6px' }}> aboard!</span>
+              <span style={{ color: '#7A9E7E', marginLeft: '6px' }}>aboard!</span>
             </h1>
             <p className="text-muted-foreground mb-6">
               Your account has been created successfully. Let's set up your delivery location.
@@ -177,114 +94,6 @@ export default function Signup() {
               Set Location
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  // OTP Verification Step
-  if (step === "otp") {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F8F4EC' }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-md"
-        >
-          <div className="bg-white rounded-[2.5rem] shadow-xl border border-border/30 overflow-hidden">
-            {/* Header */}
-            <div className="p-8 pb-6 text-center relative" style={{ backgroundColor: 'rgba(122, 158, 126, 0.1)' }}>
-              <button
-                onClick={() => setStep("details")}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-black/5 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 text-foreground" />
-              </button>
-              
-              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden shadow-md">
-                <img src={bkLogo} alt="Babita's Kitchen" className="w-full h-full object-cover" />
-              </div>
-              <h1 className="font-display text-2xl font-bold text-foreground font-serif">
-                <span style={{ color: '#8B5E3C' }}>Verify</span>
-                <span style={{ color: '#7A9E7E', marginLeft: '6px' }}>OTP</span>
-              </h1>
-              <p className="text-muted-foreground mt-2 text-sm">
-                Enter the 6-digit code sent to
-              </p>
-              <p className="text-foreground font-medium mt-1">
-                +91 {phone}
-              </p>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleVerifyOTP} className="p-8 space-y-6">
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm"
-                >
-                  {error}
-                </motion.div>
-              )}
-
-              {/* OTP Input */}
-              <div className="space-y-4">
-                <label className="text-sm font-medium text-foreground ml-1 block text-center">
-                  Enter OTP
-                </label>
-                <div className="flex justify-center">
-                  <InputOTP
-                    value={otp}
-                    onChange={(value) => setOtp(value)}
-                    maxLength={6}
-                    className="gap-2"
-                  >
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={1} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={2} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={3} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={4} className="w-12 h-12 text-lg" />
-                      <InputOTPSlot index={5} className="w-12 h-12 text-lg" />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isLoading || otp.length !== 6}
-                className="w-full h-12 rounded-xl text-white font-semibold text-lg shadow-md hover:shadow-lg transition-all"
-                style={{ backgroundColor: '#7A9E7E' }}
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                ) : (
-                  "Verify & Create Account"
-                )}
-              </Button>
-
-              {/* Resend Section */}
-              <div className="text-center space-y-2">
-                {resendTimer > 0 ? (
-                  <p className="text-muted-foreground text-sm">
-                    Resend OTP in <span className="font-medium text-foreground">{resendTimer}s</span>
-                  </p>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={isLoading}
-                    className="text-sm text-primary hover:underline font-medium"
-                  >
-                    Resend OTP
-                  </button>
-                )}
-              </div>
-            </form>
           </div>
         </motion.div>
       </div>
@@ -314,7 +123,7 @@ export default function Signup() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSendOTP} className="p-8 space-y-5">
+          <form onSubmit={handleSignup} className="p-8 space-y-5">
             {error && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -381,7 +190,7 @@ export default function Signup() {
                 <Loader2 className="w-5 h-5 animate-spin mx-auto" />
               ) : (
                 <>
-                  Send OTP
+                  Create Account
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}

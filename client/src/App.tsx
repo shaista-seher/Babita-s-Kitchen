@@ -23,21 +23,21 @@ import Signup from "@/pages/signup";
 import ForgotPassword from "@/pages/forgot-password";
 import Story from "@/pages/story";
 import OpeningVideo from "@/pages/opening-video";
-import OTPVerification from "@/pages/otp-verification";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { location } = useUserLocation();
 
   // Check if user has seen the opening video
   const hasSeenOpening = typeof window !== "undefined" && localStorage.getItem("hasSeenOpening");
+  const hasAuthToken = typeof window !== "undefined" && localStorage.getItem("auth_token");
 
   return (
     <Switch>
       {/* Opening video - only shown once */}
       <Route path="/">
         {hasSeenOpening ? (
-          isAuthenticated || localStorage.getItem("auth_token") ? (
+          hasAuthToken ? (
             location ? (
               <Redirect href="/home" />
             ) : (
@@ -49,11 +49,6 @@ function Router() {
         ) : (
           <OpeningVideo />
         )}
-      </Route>
-
-      {/* OTP Verification Route */}
-      <Route path="/otp-verification">
-        <OTPVerification />
       </Route>
 
       {/* Location selection page */}

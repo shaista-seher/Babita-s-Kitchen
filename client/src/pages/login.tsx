@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/context/auth-context";
-import { Loader2, Phone, Eye, EyeOff, ArrowRight, UserPlus } from "lucide-react";
+import { Loader2, Phone, ArrowRight, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
@@ -11,10 +10,11 @@ export default function Login() {
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [otpSent, setOtpSent] = useState(false);
   
-  const { signIn, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Check for existing auth
+  const isAuthenticated = typeof window !== "undefined" && localStorage.getItem("auth_token");
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -23,9 +23,7 @@ export default function Login() {
   }
 
   const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits
     const digits = value.replace(/\D/g, "");
-    // Limit to 10 digits
     return digits.slice(0, 10);
   };
 
@@ -34,7 +32,7 @@ export default function Login() {
     setPhone(formatted);
   };
 
-  const handleSendOTP = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -46,26 +44,16 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // Call the send OTP API
-      const response = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: `+91${phone}`, channel: "sms" }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to send OTP");
-      }
-
-      // Store phone in sessionStorage for the OTP page
-      sessionStorage.setItem("pendingPhone", `+91${phone}`);
+      // For demo: Simulate login with phone number
+      // In production, integrate with your backend/Supabase
+      const demoToken = `phone_token_${phone}_${Date.now()}`;
+      localStorage.setItem("auth_token", demoToken);
+      localStorage.setItem("user_phone", `+91${phone}`);
       
-      // Navigate to OTP verification
-      setLocation(`/otp-verification?phone=${phone}`);
+      // Navigate to location
+      setLocation("/location");
     } catch (err: any) {
-      setError(err.message || "Failed to send OTP. Please try again.");
+      setError(err.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +81,7 @@ export default function Login() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSendOTP} className="p-8 space-y-6">
+          <form onSubmit={handleLogin} className="p-8 space-y-6">
             {error && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -121,9 +109,6 @@ export default function Login() {
                   />
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground ml-1">
-                Enter the 10-digit mobile number registered with your account
-              </p>
             </div>
 
             <Button
@@ -136,7 +121,7 @@ export default function Login() {
                 <Loader2 className="w-5 h-5 animate-spin mx-auto" />
               ) : (
                 <>
-                  Send OTP
+                  Continue
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
