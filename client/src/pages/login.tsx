@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { Loader2, Phone, ArrowRight, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,17 +10,6 @@ export default function Login() {
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const [, setLocation] = useLocation();
-
-  // Check for existing auth
-  const isAuthenticated = typeof window !== "undefined" && localStorage.getItem("auth_token");
-
-  // Redirect if already authenticated
-  if (isAuthenticated) {
-    setLocation("/home");
-    return null;
-  }
 
   const formatPhoneNumber = (value: string) => {
     const digits = value.replace(/\D/g, "");
@@ -43,20 +32,12 @@ export default function Login() {
 
     setIsLoading(true);
 
-    try {
-      // For demo: Simulate login with phone number
-      // In production, integrate with your backend/Supabase
-      const demoToken = `phone_token_${phone}_${Date.now()}`;
-      localStorage.setItem("auth_token", demoToken);
-      localStorage.setItem("user_phone", `+91${phone}`);
-      
-      // Navigate to location
-      setLocation("/location");
-    } catch (err: any) {
-      setError(err.message || "Login failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    // Simulate login - in production, call your API
+    setTimeout(() => {
+      localStorage.setItem("auth_token", "logged_in_" + Date.now());
+      localStorage.setItem("user_phone", "+91" + phone);
+      window.location.reload();
+    }, 500);
   };
 
   return (
@@ -64,7 +45,6 @@ export default function Login() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-md"
       >
         <div className="bg-white rounded-[2.5rem] shadow-xl border border-border/30 overflow-hidden">
@@ -105,7 +85,7 @@ export default function Login() {
                     onChange={handlePhoneChange}
                     maxLength={10}
                     required
-                    className="h-12 pl-20 rounded-xl border-border/60 bg-background focus:ring-2 focus:ring-primary/30"
+                    className="h-12 pl-20 rounded-xl border-border/60 bg-background"
                   />
                 </div>
               </div>
@@ -114,7 +94,7 @@ export default function Login() {
             <Button
               type="submit"
               disabled={isLoading || phone.length !== 10}
-              className="w-full h-12 rounded-xl text-white font-semibold text-lg shadow-md hover:shadow-lg transition-all"
+              className="w-full h-12 rounded-xl text-white font-semibold text-lg"
               style={{ backgroundColor: '#7A9E7E' }}
             >
               {isLoading ? (
@@ -127,14 +107,12 @@ export default function Login() {
               )}
             </Button>
 
-            {/* Divider */}
             <div className="flex items-center gap-4 my-6">
               <div className="flex-1 h-px bg-gray-200"></div>
               <span className="text-sm text-muted-foreground">OR</span>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
-            {/* Sign Up Link */}
             <div className="text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
               <Link href="/signup" className="text-primary hover:underline font-semibold flex items-center justify-center gap-1 mt-2">

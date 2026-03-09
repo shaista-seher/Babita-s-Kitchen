@@ -1,14 +1,12 @@
 import { useState } from "react";
-import { Switch, Route, Redirect, useLocation } from "wouter";
+import { Switch, Route, useLocation as useWouterLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/cart-context";
-import { AuthProvider, useAuth } from "./context/auth-context";
 import { LocationProvider, useLocation as useUserLocation } from "./context/location-context";
 import NotFound from "@/pages/not-found";
-import { ProtectedRoute } from "@/components/protected-route";
 import { Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,68 +20,46 @@ import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import ForgotPassword from "@/pages/forgot-password";
 import Story from "@/pages/story";
-import OpeningVideo from "@/pages/opening-video";
 
 function Router() {
-  const { isAuthenticated } = useAuth();
+  const [isAuthenticated] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("auth_token");
+  });
+  
   const { location } = useUserLocation();
+  const [, setRoute] = useWouterLocation();
 
-  // Check if user has seen the opening video
-  const hasSeenOpening = typeof window !== "undefined" && localStorage.getItem("hasSeenOpening");
-  const hasAuthToken = typeof window !== "undefined" && localStorage.getItem("auth_token");
+  // Show login if not authenticated
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
+  // Show location if not set
+  if (!location) {
+    return <LocationSelection />;
+  }
 
   return (
     <Switch>
-      {/* Opening video - only shown once */}
-      <Route path="/">
-        {hasSeenOpening ? (
-          hasAuthToken ? (
-            location ? (
-              <Redirect href="/home" />
-            ) : (
-              <Redirect href="/location" />
-            )
-          ) : (
-            <Redirect href="/login" />
-          )
-        ) : (
-          <OpeningVideo />
-        )}
-      </Route>
-
-      {/* Location selection page */}
-      <Route path="/location" component={LocationSelection} />
-
-      {/* Public routes */}
+      <Route path="/" component={Home} />
       <Route path="/home" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/product/:id" component={ProductDetails} />
       <Route path="/story" component={Story} />
-      
-      {/* Protected routes */}
-      <Route path="/cart">
-        <ProtectedRoute>
-          <Cart />
-        </ProtectedRoute>
-      </Route>
-      
-      <Route path="/profile">
-        <ProtectedRoute>
-          <Profile />
-        </ProtectedRoute>
-      </Route>
-      
+      <Route path="/cart" component={Cart} />
+      <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// Location selection component for the flow
+// Location selection component
 function LocationSelection() {
   const { requestLocation, searchLocation, isLoading, error, location } = useUserLocation();
-  const [, setLocation] = useLocation();
+  const [, setRoute] = useWouterLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
 
@@ -98,9 +74,9 @@ function LocationSelection() {
     }
   };
 
-  // Redirect to home if location is already set
   if (location) {
-    return <Redirect href="/home" />;
+    setRoute("/home");
+    return null;
   }
 
   return (
@@ -108,7 +84,6 @@ function LocationSelection() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-md"
       >
         <div className="bg-white rounded-[2.5rem] shadow-xl border border-border/30 overflow-hidden p-8">
@@ -124,21 +99,16 @@ function LocationSelection() {
           </div>
 
           {error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm mb-4"
-            >
+            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm mb-4">
               {error}
-            </motion.div>
+            </div>
           )}
 
           <div className="space-y-4">
-            {/* Use Current Location Button */}
             <Button
               onClick={handleRequestLocation}
               disabled={isLoading}
-              className="w-full h-14 rounded-xl text-white font-semibold text-lg shadow-md hover:shadow-lg transition-all"
+              className="w-full h-14 rounded-xl text-white font-semibold text-lg"
               style={{ backgroundColor: '#7A9E7E' }}
             >
               {isLoading ? (
@@ -151,14 +121,12 @@ function LocationSelection() {
               )}
             </Button>
 
-            {/* Divider */}
             <div className="flex items-center gap-4 my-6">
               <div className="flex-1 h-px bg-gray-200"></div>
               <span className="text-sm text-muted-foreground">OR</span>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
-            {/* Search Location */}
             <button
               onClick={() => setShowSearch(!showSearch)}
               className="w-full h-14 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 font-semibold text-lg hover:border-green-500 hover:text-green-600 transition-colors"
@@ -200,14 +168,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <LocationProvider>
-            <CartProvider>
-              <Toaster />
-              <Router />
-            </CartProvider>
-          </LocationProvider>
-        </AuthProvider>
+        <LocationProvider>
+          <CartProvider>
+            <Toaster />
+            <Router />
+          </CartProvider>
+        </LocationProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

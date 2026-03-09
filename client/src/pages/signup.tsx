@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { Loader2, Phone, User, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,17 +13,6 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  
-  const [, setLocation] = useLocation();
-
-  // Check for existing auth
-  const isAuthenticated = typeof window !== "undefined" && localStorage.getItem("auth_token");
-
-  // Redirect if already authenticated
-  if (isAuthenticated) {
-    setLocation("/home");
-    return null;
-  }
 
   const formatPhoneNumber = (value: string) => {
     const digits = value.replace(/\D/g, "");
@@ -51,22 +40,15 @@ export default function Signup() {
 
     setIsLoading(true);
 
-    try {
-      // For demo: Simulate signup with phone number
-      const demoToken = `phone_token_${phone}_${Date.now()}`;
-      localStorage.setItem("auth_token", demoToken);
-      localStorage.setItem("user_phone", `+91${phone}`);
+    // Simulate signup - in production, call your API
+    setTimeout(() => {
+      localStorage.setItem("auth_token", "logged_in_" + Date.now());
+      localStorage.setItem("user_phone", "+91" + phone);
       localStorage.setItem("user_name", `${firstName} ${lastName}`.trim());
-      
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || "Signup failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    }, 500);
   };
 
-  // Success Step
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F8F4EC' }}>
@@ -84,10 +66,10 @@ export default function Signup() {
               <span style={{ color: '#7A9E7E', marginLeft: '6px' }}>aboard!</span>
             </h1>
             <p className="text-muted-foreground mb-6">
-              Your account has been created successfully. Let's set up your delivery location.
+              Your account has been created. Please set your delivery location.
             </p>
             <Button
-              onClick={() => setLocation("/location")}
+              onClick={() => window.location.reload()}
               className="w-full h-12 rounded-xl text-white font-semibold"
               style={{ backgroundColor: '#7A9E7E' }}
             >
@@ -100,13 +82,11 @@ export default function Signup() {
     );
   }
 
-  // Initial Details Step
   return (
     <div className="min-h-screen flex items-center justify-center p-4 py-12" style={{ backgroundColor: '#F8F4EC' }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-md"
       >
         <div className="bg-white rounded-[2.5rem] shadow-xl border border-border/30 overflow-hidden">
@@ -174,7 +154,7 @@ export default function Signup() {
                     onChange={handlePhoneChange}
                     maxLength={10}
                     required
-                    className="h-12 pl-20 rounded-xl border-border/60 bg-background focus:ring-2 focus:ring-primary/30"
+                    className="h-12 pl-20 rounded-xl border-border/60 bg-background"
                   />
                 </div>
               </div>
@@ -183,7 +163,7 @@ export default function Signup() {
             <Button
               type="submit"
               disabled={isLoading || phone.length !== 10 || !firstName.trim()}
-              className="w-full h-12 rounded-xl text-white font-semibold text-lg shadow-md hover:shadow-lg transition-all"
+              className="w-full h-12 rounded-xl text-white font-semibold text-lg"
               style={{ backgroundColor: '#7A9E7E' }}
             >
               {isLoading ? (
