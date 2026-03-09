@@ -22,7 +22,7 @@ import ForgotPassword from "@/pages/forgot-password";
 import Story from "@/pages/story";
 
 // Opening Video Component
-function OpeningVideo() {
+function OpeningVideo({ onComplete }: { onComplete?: () => void }) {
   const [, setRoute] = useWouterLocation();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,13 +30,15 @@ function OpeningVideo() {
     const video = document.getElementById('opening-video') as HTMLVideoElement;
     if (!video) return;
 
-    localStorage.setItem("hasSeenOpening", "true");
-
     video.addEventListener('canplay', () => setIsLoading(false));
-    video.addEventListener('ended', () => setRoute("/login"));
+    video.addEventListener('ended', () => {
+      if (onComplete) onComplete();
+      setRoute("/login");
+    });
     
     video.play().catch(() => {
       // Auto redirect if video fails
+      if (onComplete) onComplete();
       setRoute("/login");
     });
 
@@ -44,9 +46,10 @@ function OpeningVideo() {
       video.removeEventListener('canplay', () => {});
       video.removeEventListener('ended', () => {});
     };
-  }, [setRoute]);
+  }, [setRoute, onComplete]);
 
   const handleSkip = () => {
+    if (onComplete) onComplete();
     setRoute("/login");
   };
 
@@ -78,10 +81,8 @@ function OpeningVideo() {
 }
 
 function Router() {
-  const [showVideo, setShowVideo] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return !localStorage.getItem("hasSeenOpening");
-  });
+  // ALWAYS show video first - don't check localStorage
+  const [showVideo, setShowVideo] = useState(true);
   
   const [isAuthenticated] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -91,9 +92,9 @@ function Router() {
   const { location } = useUserLocation();
   const [, setRoute] = useWouterLocation();
 
-  // Show opening video first
+  // Show opening video every time app starts
   if (showVideo) {
-    return <OpeningVideo />;
+    return <OpeningVideo onComplete={() => setShowVideo(false)} />;
   }
 
   // Show login if not authenticated
