@@ -1,17 +1,53 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { Link } from "wouter";
 import type { Product } from "@shared/schema";
-import { Leaf, Flame, WheatOff, Dumbbell, Plus } from "lucide-react";
+import { Leaf, Flame, WheatOff, Dumbbell, Plus, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
   const { toast } = useToast();
+  const [isAnimating, setIsAnimating] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const handleAdd = (e: React.MouseEvent) => {
+  const handleAdd = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigating to detail page
+    
+    if (!buttonRef.current) return;
+    
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+    const flyingItem = document.createElement('div');
+    flyingItem.className = 'fixed w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold z-50 pointer-events-none';
+    flyingItem.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2l6 6-6 6"/></svg>';
+    document.body.appendChild(flyingItem);
+    
+    // Set initial position at button
+    flyingItem.style.left = buttonRect.left + buttonRect.width / 2 - 24 + 'px';
+    flyingItem.style.top = buttonRect.top + buttonRect.height / 2 - 24 + 'px';
+    
+    setIsAnimating(true);
+    
+    // Animate to cart position
+    requestAnimationFrame(() => {
+      const cartIcon = document.querySelector('[data-cart-icon]');
+      if (cartIcon) {
+        const cartRect = cartIcon.getBoundingClientRect();
+        
+        flyingItem.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        flyingItem.style.left = cartRect.left + cartRect.width / 2 - 24 + 'px';
+        flyingItem.style.top = cartRect.top + cartRect.height / 2 - 24 + 'px';
+        
+        setTimeout(() => {
+          document.body.removeChild(flyingItem);
+          setIsAnimating(false);
+        }, 800);
+      }
+    });
+    
+    // Add to cart
     addItem(product);
     toast({
       title: "Added to Cart",
@@ -87,11 +123,28 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
 
           <Button 
+            ref={buttonRef}
             onClick={handleAdd}
-            className="w-full rounded-xl bg-secondary/5 hover:bg-primary hover:text-primary-foreground text-secondary font-medium transition-all group-hover:shadow-md"
+            disabled={isAnimating || !product.isAvailable}
+            className="w-full rounded-xl bg-secondary/5 hover:bg-primary hover:text-primary-foreground text-secondary font-medium transition-all group-hover:shadow-md relative overflow-hidden"
             variant="ghost"
           >
-            <Plus className="w-4 h-4 mr-2" /> Add to Bag
+            <AnimatePresence>
+              {isAnimating ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  className="flex items-center justify-center"
+                >
+                  <ShoppingBag className="w-4 h-4 mr-2" /> Adding...
+                </motion.div>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" /> Add to Bag
+                </>
+              )}
+            </AnimatePresence>
           </Button>
         </div>
       </div>

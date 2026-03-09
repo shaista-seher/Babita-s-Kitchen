@@ -70,6 +70,16 @@ export default function Home() {
                 All
               </button>
               <button
+                onClick={() => setActiveCategory('papad')}
+                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
+                  activeCategory === 'papad' 
+                    ? 'bg-foreground text-background shadow-md' 
+                    : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
+                }`}
+              >
+                Papad
+              </button>
+              <button
                 onClick={() => setActiveCategory('pickles-achaar')}
                 className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
                   activeCategory === 'pickles-achaar' 

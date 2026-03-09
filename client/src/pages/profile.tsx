@@ -4,7 +4,7 @@ import { Layout } from "@/components/layout";
 import { useAuth } from "@/context/auth-context";
 import { useOrders, useAddresses, useCreateAddress } from "@/hooks/use-supabase";
 import { useLocation, UserLocation } from "@/context/location-context";
-import { Clock, MapPin, Package, Plus, Loader2, Navigation } from "lucide-react";
+import { Clock, MapPin, Package, Plus, Loader2, Navigation, Edit3, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,9 +19,16 @@ export default function Profile() {
   const { location, requestLocation, isLoading: locationLoading } = useLocation() as { location: UserLocation | null; requestLocation: () => void; isLoading: boolean };
   const [, setLocation] = useWouterLocation();
   
-  const [activeTab, setActiveTab] = useState<'orders'|'addresses'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders'|'addresses'|'profile'>('orders');
   const [isAddressOpen, setIsAddressOpen] = useState(false);
+  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [newAddress, setNewAddress] = useState({ label: '', address: '' });
+  const [profileData, setProfileData] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    phone: user?.phone || '',
+    email: user?.email || ''
+  });
 
   if (!isAuthenticated || authLoading) {
     return (
@@ -51,6 +58,18 @@ export default function Profile() {
         setNewAddress({ label: '', address: '' });
       }
     });
+  };
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    
+    // Update localStorage with new profile data
+    localStorage.setItem('user_name', `${profileData.firstName} ${profileData.lastName}`.trim());
+    localStorage.setItem('user_phone', profileData.phone);
+    
+    // Update auth context if it has update method
+    setIsProfileEditOpen(false);
   };
 
   const getStatusColor = (status: string | null) => {
@@ -89,12 +108,93 @@ export default function Profile() {
             >
               <MapPin className="w-5 h-5" /> Saved Addresses
             </button>
+            <button 
+              onClick={() => setActiveTab('profile')}
+              className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-medium transition-all ${activeTab === 'profile' ? 'bg-secondary text-white shadow-md' : 'text-secondary hover:bg-secondary/5'}`}
+            >
+              <Edit3 className="w-5 h-5" /> Edit Profile
+            </button>
           </div>
 
           {/* Main Content */}
           <div className="flex-1">
-            {activeTab === 'orders' && (
+            {activeTab === 'profile' && (
               <div>
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-3xl font-display font-bold text-foreground">Edit Profile</h3>
+                  <Dialog open={isProfileEditOpen} onOpenChange={setIsProfileEditOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="rounded-full bg-primary hover:bg-primary/90">
+                        <Edit3 className="w-4 h-4 mr-2" /> Edit Info
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md rounded-[2rem] p-8">
+                      <DialogHeader>
+                        <DialogTitle className="font-display text-2xl mb-4">Edit Profile Information</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleUpdateProfile} className="space-y-5">
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">First Name</label>
+                          <Input 
+                            required
+                            value={profileData.firstName}
+                            onChange={e => setProfileData(prev => ({...prev, firstName: e.target.value}))}
+                            className="rounded-xl"
+                            placeholder="First Name"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Last Name</label>
+                          <Input 
+                            value={profileData.lastName}
+                            onChange={e => setProfileData(prev => ({...prev, lastName: e.target.value}))}
+                            className="rounded-xl"
+                            placeholder="Last Name"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Phone Number</label>
+                          <Input 
+                            required
+                            value={profileData.phone}
+                            onChange={e => setProfileData(prev => ({...prev, phone: e.target.value}))}
+                            className="rounded-xl"
+                            placeholder="Phone Number"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Email</label>
+                          <Input 
+                            type="email"
+                            value={profileData.email}
+                            onChange={e => setProfileData(prev => ({...prev, email: e.target.value}))}
+                            className="rounded-xl"
+                            placeholder="Email"
+                          />
+                        </div>
+                        <Button type="submit" className="w-full rounded-xl bg-secondary h-12 text-white">
+                          <Save className="w-4 h-4 mr-2" /> Save Changes
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl border border-border/50 shadow-sm">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center font-display text-2xl font-bold">
+                      {user?.firstName?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                    </div>
+                    <div>
+                      <h4 className="font-display font-semibold text-lg text-gray-800">{user?.firstName || 'User'} {user?.lastName || ''}</h4>
+                      <p className="text-sm text-gray-600">{user?.email}</p>
+                      <p className="text-sm text-gray-600">{user?.phone ? `+91 ${user.phone}` : 'No phone'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {activeTab === 'orders' && (
                 <h3 className="text-3xl font-display font-bold text-foreground mb-8">Order History</h3>
                 
                 {loadingOrders ? (

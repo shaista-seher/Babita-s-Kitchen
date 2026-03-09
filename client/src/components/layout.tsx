@@ -97,12 +97,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
                 {/* Location Search Dropdown */}
                 {showLocationSearch && (
-                  <div className="absolute top-full mt-2 right-0 w-80 bg-white rounded-2xl shadow-xl border border-border p-4 z-50">
+                  <div className="absolute top-full mt-2 right-0 w-80 bg-white rounded-2xl shadow-xl border border-border p-4 z-50 md:right-0 sm:right-0">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-sm text-foreground">Search Location</h4>
+                      <h4 className="font-semibold text-sm text-gray-800">Search Location</h4>
                       <button 
                         onClick={() => setShowLocationSearch(false)}
-                        className="p-1 hover:bg-secondary/10 rounded-full"
+                        className="p-1 hover:bg-gray-100 rounded-full"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -161,7 +161,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </div>
             )}
 
-            <Link href="/cart" className="relative p-2 rounded-full hover:bg-primary/10 transition-colors text-primary">
+            <Link href="/cart" className="relative p-2 rounded-full hover:bg-primary/10 transition-colors text-primary" data-cart-icon>
               <ShoppingBag className="w-6 h-6" />
               {totalItems > 0 && (
                 <span className="absolute top-1 right-1 w-5 h-5 bg-[#E2725B] text-white text-[10px] font-bold flex items-center justify-center rounded-full shadow-sm">
