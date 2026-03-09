@@ -104,11 +104,7 @@ function MainRouter() {
 
   // Check if user has seen video
   useEffect(() => {
-    const seenVideo = localStorage.getItem("hasSeenVideo");
-    if (!seenVideo) {
-      setShowVideo(true);
-      localStorage.setItem("hasSeenVideo", "true");
-    }
+    setShowVideo(true);
   }, []);
 
   // Listen for auth changes
