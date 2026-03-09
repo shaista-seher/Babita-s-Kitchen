@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation as useWouterLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
@@ -6,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/cart-context";
 import { LocationProvider, useLocation as useUserLocation } from "./context/location-context";
+import { AuthProvider } from "./context/auth-context";
 import NotFound from "@/pages/not-found";
 import { Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,7 +39,6 @@ function OpeningVideo({ onComplete }: { onComplete?: () => void }) {
     });
     
     video.play().catch(() => {
-      // Auto redirect if video fails
       if (onComplete) onComplete();
       setRoute("/login");
     });
@@ -66,6 +67,7 @@ function OpeningVideo({ onComplete }: { onComplete?: () => void }) {
         className="w-full h-full object-contain"
         playsInline
         muted
+        autoPlay
       >
         <source src="/opening-video.mp4" type="video/mp4" />
       </video>
@@ -81,7 +83,6 @@ function OpeningVideo({ onComplete }: { onComplete?: () => void }) {
 }
 
 function Router() {
-  // ALWAYS show video first - don't check localStorage
   const [showVideo, setShowVideo] = useState(true);
   
   const [isAuthenticated] = useState(() => {
@@ -92,17 +93,14 @@ function Router() {
   const { location } = useUserLocation();
   const [, setRoute] = useWouterLocation();
 
-  // Show opening video every time app starts
   if (showVideo) {
     return <OpeningVideo onComplete={() => setShowVideo(false)} />;
   }
 
-  // Show login if not authenticated
   if (!isAuthenticated) {
     return <Login />;
   }
 
-  // Show location if not set
   if (!location) {
     return <LocationSelection />;
   }
@@ -123,7 +121,6 @@ function Router() {
   );
 }
 
-// Location selection component
 function LocationSelection() {
   const { requestLocation, searchLocation, isLoading, error, location } = useUserLocation();
   const [, setRoute] = useWouterLocation();
@@ -235,12 +232,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <LocationProvider>
-          <CartProvider>
-            <Toaster />
-            <Router />
-          </CartProvider>
-        </LocationProvider>
+        <AuthProvider>
+          <LocationProvider>
+            <CartProvider>
+              <Toaster />
+              <Router />
+            </CartProvider>
+          </LocationProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
