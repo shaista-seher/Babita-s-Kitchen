@@ -19,7 +19,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [resendTimer, setResendTimer] = useState(0);
   
-  const { verifyOTP } = useAuth();
+  const { signInWithPhone, verifyOTP } = useAuth();
   const [, setLocation] = useLocation();
 
   // Check auth directly from localStorage to redirect to home
@@ -50,12 +50,13 @@ export default function Login() {
 
     setIsLoading(true);
 
-    // Simulate sending OTP (demo)
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    sessionStorage.setItem('pendingPhone', phone);
-    setStep("otp");
-    setResendTimer(30);
+    const result = await signInWithPhone(phone);
+    if (result.error) {
+      setError(result.error.message);
+    } else {
+      setStep("otp");
+      setResendTimer(30);
+    }
     setIsLoading(false);
   };
 
@@ -87,8 +88,12 @@ export default function Login() {
 
   const handleResend = async () => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setResendTimer(30);
+    const result = await signInWithPhone(phone);
+    if (!result.error) {
+      setResendTimer(30);
+    } else {
+      setError(result.error.message);
+    }
     setIsLoading(false);
   };
 
@@ -132,8 +137,8 @@ export default function Login() {
               <p className="text-foreground font-medium mt-1">
                 +91 {phone}
               </p>
-              <p className="text-xs text-green-600 mt-2">
-                Demo: Use OTP 123456
+              <p className="text-xs text-muted-foreground mt-2">
+                Check console for OTP
               </p>
             </div>
 

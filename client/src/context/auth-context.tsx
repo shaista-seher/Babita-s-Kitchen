@@ -48,59 +48,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const signInWithPhone = async (phone: string) => {
-    try {
-      // For demo: just simulate sending OTP
-      // Store pending phone for verification
-      sessionStorage.setItem('pendingPhone', phone);
-      return { error: null };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  };
+const signInWithPhone = async (phone: string) => {
+  try {
+    const response = await fetch('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    });
 
-  const verifyOTP = async (phone: string, otp: string): Promise<{ error: Error | null; token?: string }> => {
-    try {
-      // Accept demo OTP "123456" for testing
-      if (otp === DEMO_OTP) {
-        const token = 'auth_' + Date.now();
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('user_phone', phone);
-        
-        setUser({
-          id: 'user-' + Date.now(),
-          email: '',
-          phone: phone,
-        });
-        
-        return { error: null, token };
-      }
-      
-      return { error: new Error('Invalid OTP. Use 123456 for demo.') };
-    } catch (error) {
-      return { error: error as Error };
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { error: new Error(data.message) };
     }
-  };
+
+    return { error: null };
+  } catch (error) {
+    return { error: error as Error };
+  }
+};
+
+const verifyOTP = async (phone: string, otp: string): Promise<{ error: Error | null; token?: string }> => {
+  try {
+    const response = await fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, otp }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { error: new Error(data.message) };
+    }
+
+    if (data.token) {
+      localStorage.setItem('auth_token', data.token);
+    }
+
+    if (data.user) {
+      setUser(data.user);
+    }
+    
+    return { error: null, token: data.token };
+  } catch (error) {
+    return { error: error as Error };
+  }
+};
 
   const signUp = async (firstName: string, lastName: string, phone: string) => {
-    try {
-      const token = 'auth_' + Date.now();
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('user_phone', phone);
-      localStorage.setItem('user_name', `${firstName} ${lastName}`.trim());
-      
-      setUser({
-        id: 'user-' + Date.now(),
-        email: '',
-        phone: phone,
-        firstName,
-        lastName,
-      });
-      
-      return { error: null };
-    } catch (error) {
-      return { error: error as Error };
-    }
+    // Send OTP already called, this is no-op for backend verify
+    return { error: null };
   };
 
   const signOut = async () => {

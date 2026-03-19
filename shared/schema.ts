@@ -5,6 +5,20 @@ import { z } from "zod";
 
 export * from "./models/auth";
 
+export const phoneOtps = pgTable("phone_otps", {
+  id: serial("id").primaryKey(),
+  phone: text("phone").notNull().unique(),
+  otp: text("otp_hash").notNull(), // hashed OTP
+  expiresAt: timestamp("expires_at").notNull(),
+  attempts: integer("attempts").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type PhoneOtp = typeof phoneOtps.$inferSelect;
+export type InsertPhoneOtp = typeof phoneOtps.$inferInsert;
+export const insertPhoneOtpSchema = createInsertSchema(phoneOtps).omit({ id: true, createdAt: true });
+
+
 // === TABLE DEFINITIONS ===
 
 export const categories = pgTable("categories", {

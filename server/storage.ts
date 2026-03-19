@@ -6,11 +6,15 @@ import {
   orders,
   orderItems,
   addresses,
+  phoneOtps,
+  users,
   type Product,
   type Category,
   type Order,
   type OrderItem,
   type Address,
+  type PhoneOtp,
+  type InsertPhoneOtp,
   type InsertProduct,
   type InsertCategory,
   type InsertOrder,
@@ -20,7 +24,12 @@ import {
   type OrderResponse,
   type ProductResponse,
   type ProductsQueryParams,
+  type User,
+  type UpsertUser,
 } from "@shared/schema";
+
+import bcrypt from 'bcryptjs';
+import { gt, lte, sql } from 'drizzle-orm';
 
 export interface IStorage {
   // Products
@@ -40,9 +49,83 @@ export interface IStorage {
   // Addresses
   getAddresses(userId: string): Promise<Address[]>;
   createAddress(userId: string, address: InsertAddress): Promise<Address>;
+
+  // Auth
+  createOtp(phone: string, plainOtp: string): Promise<void>;
+  verifyOtp(phone: string, plainOtp: string): Promise<boolean>;
+  getUserByPhone(phone: string): Promise<User | undefined>;
+  upsertUser(phone: string, firstName?: string, lastName?: string): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
+  async createOtp(phone: string, plainOtp: string): Promise<void> {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hash = await bcrypt.hash(plainOtp, 10);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    await db.insert(phoneOtps).values({
+      phone,
+      otp: hash,
+      expiresAt,
+      attempts: 0,
+    }).onConflictDoUpdate({
+      target: phoneOtps.phone,
+      set: {
+        otp: hash,
+        expiresAt,
+        attempts: 0,
+      }
+    });
+    
+    console.log(`OTP for ${phone}: ${otp}`); // Mock SMS
+  }
+
+  async verifyOtp(phone: string, plainOtp: string): Promise<boolean> {
+    const otpRecord = await db.select().from(phoneOtps).where(eq(phoneOtps.phone, phone)).limit(1);
+    if (otpRecord.length === 0) return false;
+
+    const otp = otpRecord[0];
+    if (new Date() > otp.expiresAt) {
+      await db.delete(phoneOtps).where(eq(phoneOtps.phone, phone));
+      return false;
+    }
+
+    if (otp.attempts >= 3) {
+      await db.delete(phoneOtps).where(eq(phoneOtps.phone, phone));
+      return false;
+    }
+
+    const isValid = await bcrypt.compare(plainOtp, otp.otp);
+    if (isValid) {
+      await db.delete(phoneOtps).where(eq(phoneOtps.phone, phone));
+      return true;
+    } else {
+      await db.update(phoneOtps).set({ attempts: otp.attempts + 1 }).where(eq(phoneOtps.phone, phone));
+      return false;
+    }
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, phone)).limit(1);
+    return result[0];
+  }
+
+  async upsertUser(phone: string, firstName?: string, lastName?: string): Promise<User> {
+    const [user] = await db.insert(users).values({
+      email: phone,
+      firstName,
+      lastName,
+    }).onConflictDoUpdate({
+      target: users.email,
+      set: {
+        firstName,
+        lastName,
+        updatedAt: sql`CURRENT_TIMESTAMP`,
+      }
+    }).returning();
+
+    return user;
+  }
   async getProducts(params?: ProductsQueryParams): Promise<ProductResponse[]> {
     let query = db.select({
       product: products,

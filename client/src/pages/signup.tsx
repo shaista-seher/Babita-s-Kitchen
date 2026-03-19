@@ -21,7 +21,7 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [resendTimer, setResendTimer] = useState(0);
   
-  const { signUp, verifyOTP } = useAuth();
+  const { signInWithPhone, signUp, verifyOTP } = useAuth();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
@@ -56,12 +56,14 @@ export default function Signup() {
 
     setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    sessionStorage.setItem('pendingPhone', phone);
-    sessionStorage.setItem('signupName', `${firstName} ${lastName}`.trim());
-    setStep("otp");
-    setResendTimer(30);
+    const result = await signInWithPhone(phone);
+    if (result.error) {
+      setError(result.error.message);
+    } else {
+      sessionStorage.setItem('signupName', `${firstName} ${lastName}`.trim());
+      setStep("otp");
+      setResendTimer(30);
+    }
     setIsLoading(false);
   };
 
@@ -94,8 +96,12 @@ export default function Signup() {
 
   const handleResend = async () => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setResendTimer(30);
+    const result = await signInWithPhone(phone);
+    if (!result.error) {
+      setResendTimer(30);
+    } else {
+      setError(result.error.message);
+    }
     setIsLoading(false);
   };
 
@@ -170,8 +176,8 @@ export default function Signup() {
               <p className="text-foreground font-medium mt-1">
                 +91 {phone}
               </p>
-              <p className="text-xs text-green-600 mt-2">
-                Demo: Use OTP 123456
+              <p className="text-xs text-muted-foreground mt-2">
+                Check console for OTP
               </p>
             </div>
 
