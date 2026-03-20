@@ -1,105 +1,139 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { sendOTP, verifyOTP } from '../lib/api';
-import { User } from '../types';
+import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { Session, User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
 
-interface AuthContextType {
+type AuthContextValue = {
   user: User | null;
+  session: Session | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  signInWithPhone: (phone: string) => Promise<{ error: string | null }>;
-  verifyOTP: (phone: string, otp: string) => Promise<{ error: string | null }>;
+  isAdmin: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+function getIsAdmin(user: User | null) {
+  if (!user) {
+    return false;
+  }
+
+  return (
+    user.app_metadata?.role === 'admin' ||
+    user.user_metadata?.role === 'admin' ||
+    user.user_metadata?.isAdmin === true
+  );
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadUser();
+    if (!supabase) {
+      setIsLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    supabase.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (error) {
+          throw error;
+        }
+
+        if (!mounted) {
+          return;
+        }
+
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+      })
+      .catch(() => {
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      });
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.subscription.unsubscribe();
+    };
   }, []);
 
-  const loadUser = async () => {
-    try {
-      const token = await AsyncStorage.getItem('auth_token');
-      const phone = await AsyncStorage.getItem('user_phone');
-      if (token && phone) {
-        setUser({
-          id: 'user-' + Date.now(),
-          phone,
-          firstName: 'User',
-          lastName: '',
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      session,
+      isLoading,
+      isAuthenticated: Boolean(session?.user),
+      isAdmin: getIsAdmin(user),
+      signIn: async (email, password) => {
+        if (!supabase) {
+          throw new Error('Supabase auth is not configured.');
+        }
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          throw error;
+        }
+      },
+      signUp: async (name, email, password) => {
+        if (!supabase) {
+          throw new Error('Supabase auth is not configured.');
+        }
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name,
+            },
+          },
         });
-      }
-    } catch (error) {
-      console.error('Auth load error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const signInWithPhone = async (phone: string) => {
-    try {
-      const result = await sendOTP(phone);
-      if (result.success) {
-        console.log('OTP sent (check server console):', result.otp);
-        return { error: null };
-      }
-      return { error: result.message || 'Failed to send OTP' };
-    } catch (error) {
-      return { error: (error as Error).message };
-    }
-  };
-
-  const verifyOTP = async (phone: string, otp: string) => {
-    try {
-      const result = await verifyOTP(phone, otp);
-      if (result.success && result.token) {
-        await AsyncStorage.setItem('auth_token', result.token);
-        await AsyncStorage.setItem('user_phone', phone);
-        setUser({
-          id: 'user-' + Date.now(),
-          phone,
-          firstName: 'User',
-          lastName: '',
-        });
-        return { error: null };
-      }
-      return { error: result.message || 'Invalid OTP' };
-    } catch (error) {
-      return { error: (error as Error).message };
-    }
-  };
-
-  const signOut = async () => {
-    await AsyncStorage.multiRemove(['auth_token', 'user_phone']);
-    setUser(null);
-  };
-
-  const value: AuthContextType = {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    signInWithPhone,
-    verifyOTP,
-    signOut,
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+        if (error) {
+          throw error;
+        }
+      },
+      signOut: async () => {
+        if (!supabase) {
+          throw new Error('Supabase auth is not configured.');
+        }
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          throw error;
+        }
+      },
+    }),
+    [isLoading, session, user]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error('useAuth must be used within AuthProvider');
   }
+
   return context;
 }
-

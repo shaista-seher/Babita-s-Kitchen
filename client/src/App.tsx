@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Switch, Route, useLocation, Redirect } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -95,17 +95,12 @@ function OpeningVideo({ onComplete }: { onComplete?: () => void }) {
 
 // Main Router with auth handling
 function MainRouter() {
-  const [showVideo, setShowVideo] = useState(true);
+  const [showVideo, setShowVideo] = useState(false);
   const [location] = useLocation();
   const { isAuthenticated } = useAuth();
   
   // Force re-render when auth changes
   const [, setAuthCheck] = useState(0);
-
-  // Check if user has seen video
-  useEffect(() => {
-    setShowVideo(true);
-  }, []);
 
   // Listen for auth changes
   useEffect(() => {
@@ -138,6 +133,12 @@ function MainRouter() {
   if (!isAuth) {
     return (
       <Switch>
+        <Route path="/">
+          <Home />
+        </Route>
+        <Route path="/home">
+          <Home />
+        </Route>
         <Route path="/login">
           <Login />
         </Route>
@@ -148,7 +149,7 @@ function MainRouter() {
           <ForgotPassword />
         </Route>
         <Route>
-          <Login />
+          <Home />
         </Route>
       </Switch>
     );

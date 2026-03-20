@@ -1,22 +1,32 @@
-import Constants from 'expo-constants';
+import { buildUrl } from '../shared/routes';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:5000';
-
-export async function sendOTP(phone: string): Promise<{ success: boolean; otp?: string; message?: string }> {
-  const response = await fetch(`${API_URL}/api/auth/send-otp`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone }),
+export async function apiFetch<T>(
+  path: string,
+  init?: RequestInit,
+  params?: Record<string, string | number>
+): Promise<T> {
+  const response = await fetch(buildUrl(path, params), {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers ?? {}),
+    },
   });
-  return response.json();
-}
 
-export async function verifyOTP(phone: string, otp: string): Promise<{ success: boolean; token?: string; message?: string }> {
-  const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phone, otp }),
-  });
-  return response.json();
-}
+  if (!response.ok) {
+    let message = `Request failed with status ${response.status}`;
+    try {
+      const body = await response.json();
+      message = body?.message ?? message;
+    } catch {
+      // Ignore malformed error bodies.
+    }
+    throw new Error(message);
+  }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  return response.json() as Promise<T>;
+}

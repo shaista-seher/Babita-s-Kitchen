@@ -1,1 +1,31 @@
-{"expo":{"name":"Babita's Kitchen","slug":"babitas-kitchen","version":"1.0.0","orientation":"portrait","icon":"./assets/icon.png","userInterfaceStyle":"light","splash":{"image":"./assets/splash.png","resizeMode":"contain","backgroundColor":"#F8F4EC"},"updates":{"fallbackToCacheTimeout":0},"assetBundlePatterns":["**/*"],"ios":{"supportsTablet":true},"android":{"adaptiveIcon":{"foregroundImage":"./assets/adaptive-icon.png","backgroundColor":"#FFFFFF"}},"web":{},"plugins":[["expo-font",{"fonts":["./assets/fonts/*"]}],"expo-av"],"experiments":{"tsconfigPaths":true},"extra":{"eas":{"projectId":"your-eas-project-id"},"apiUrl":"http://localhost:5000","supabaseUrl":"","supabaseAnonKey":""}}}
+{
+  "expo": {
+    "name": "Babita's Kitchen",
+    "slug": "babitas-kitchen-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {},
+    "web": {},
+    "plugins": [
+      "expo-av"
+    ],
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "extra": {
+      "apiUrl": "http://192.168.1.37:5000",
+      "supabaseUrl": "",
+      "supabaseAnonKey": ""
+    }
+  }
+}

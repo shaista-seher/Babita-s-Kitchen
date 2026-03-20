@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db } from "./db";
+import { db, hasDatabase } from "./db";
 import {
   products,
   categories,
@@ -207,4 +207,50 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+class MemoryStorage implements IStorage {
+  async getProducts(): Promise<ProductResponse[]> {
+    return [];
+  }
+
+  async getProduct(_id: number): Promise<ProductResponse | undefined> {
+    return undefined;
+  }
+
+  async createProduct(_product: InsertProduct): Promise<Product> {
+    throw new Error("Database is not configured.");
+  }
+
+  async getCategories(): Promise<Category[]> {
+    return [];
+  }
+
+  async createCategory(_category: InsertCategory): Promise<Category> {
+    throw new Error("Database is not configured.");
+  }
+
+  async getOrders(_userId: string): Promise<OrderResponse[]> {
+    return [];
+  }
+
+  async getOrder(_id: number): Promise<OrderResponse | undefined> {
+    return undefined;
+  }
+
+  async createOrder(_userId: string, _orderData: CreateOrderRequest): Promise<Order> {
+    throw new Error("Database is not configured.");
+  }
+
+  async getAddresses(_userId: string): Promise<Address[]> {
+    return [];
+  }
+
+  async createAddress(_userId: string, _address: InsertAddress): Promise<Address> {
+    throw new Error("Database is not configured.");
+  }
+}
+
+if (!hasDatabase) {
+  console.warn("DATABASE_URL is not set. Starting server without database-backed routes.");
+}
+
+export const storage = hasDatabase && db ? new DatabaseStorage() : new MemoryStorage();

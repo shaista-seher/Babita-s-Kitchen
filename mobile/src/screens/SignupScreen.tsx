@@ -22,33 +22,36 @@ import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { radius, spacing } from '../theme/spacing';
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
+const signupSchema = z
+  .object({
+    name: z.string().min(2),
+    email: z.string().email(),
+    password: z.string().min(6),
+    confirmPassword: z.string().min(6),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
-type LoginValues = z.infer<typeof loginSchema>;
+type SignupValues = z.infer<typeof signupSchema>;
 
-export default function LoginScreen() {
+export default function SignupScreen() {
   const navigation = useNavigation<any>();
-  const { signIn, isAuthenticated, isLoading } = useAuth();
+  const { signUp } = useAuth();
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<SignupValues>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
+      confirmPassword: '',
     },
   });
-
-  React.useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      navigation.replace('MainTabs');
-    }
-  }, [isAuthenticated, isLoading, navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -60,11 +63,12 @@ export default function LoginScreen() {
         >
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.hero}>
-              <Text style={styles.title}>Welcome back</Text>
-              <Text style={styles.subtitle}>Sign in to manage orders, checkout faster, and view your profile.</Text>
+              <Text style={styles.title}>Create account</Text>
+              <Text style={styles.subtitle}>Join Babita&apos;s Kitchen to track orders and save your details.</Text>
             </View>
 
             <View style={styles.card}>
+              <Field control={control} name="name" label="Name" placeholder="Your full name" error={errors.name?.message} />
               <Field
                 control={control}
                 name="email"
@@ -78,27 +82,35 @@ export default function LoginScreen() {
                 control={control}
                 name="password"
                 label="Password"
-                placeholder="Enter your password"
+                placeholder="Choose a password"
                 secureTextEntry
                 error={errors.password?.message}
               />
+              <Field
+                control={control}
+                name="confirmPassword"
+                label="Confirm password"
+                placeholder="Retype your password"
+                secureTextEntry
+                error={errors.confirmPassword?.message}
+              />
 
               <PrimaryButton
-                title="Sign In"
+                title="Create Account"
                 loading={isSubmitting}
                 onPress={handleSubmit(async (values) => {
                   try {
-                    await signIn(values.email, values.password);
-                    showSuccessToast('Signed in');
-                    navigation.replace('MainTabs');
+                    await signUp(values.name, values.email, values.password);
+                    showSuccessToast('Account created', 'Check your email if confirmation is enabled');
+                    navigation.replace('Login');
                   } catch (error) {
-                    showErrorToast('Sign in failed', (error as Error).message);
+                    showErrorToast('Signup failed', (error as Error).message);
                   }
                 })}
               />
 
-              <Pressable onPress={() => navigation.navigate('Signup')}>
-                <Text style={styles.link}>Create an account</Text>
+              <Pressable onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.link}>Already have an account?</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -117,7 +129,7 @@ function Field({
   ...props
 }: {
   control: any;
-  name: keyof LoginValues;
+  name: keyof SignupValues;
   label: string;
   placeholder: string;
   error?: string;

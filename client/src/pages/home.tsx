@@ -1,195 +1,156 @@
- import { useState } from "react";
+import { Info } from "lucide-react";
 import { Layout } from "@/components/layout";
-import { ProductCard } from "@/components/product-card";
-import { HeroSlider } from "@/components/hero";
-import { useProducts, useCategories } from "@/hooks/use-supabase";
-import { Search, Loader2, ChefHat, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 
-export default function Home() {
-  const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string | undefined>();
-  const [filters, setFilters] = useState({
-    isVeg: false,
-    isGlutenFree: false,
-    isHighProtein: false,
-  });
+const products = [
+  {
+    id: 1,
+    category: "PICKLES / ACHAAR",
+    name: "Traditional Nimbu Achaar",
+    seller: "wods",
+    price: 125,
+    isVeg: true,
+    image: "https://source.unsplash.com/400x300/?pickle,jar",
+    description: "",
+  },
+  {
+    id: 2,
+    category: "PAPAD",
+    name: "90's MILL Aloo Chips",
+    seller: "",
+    price: null,
+    isVeg: true,
+    image: "https://source.unsplash.com/400x300/?papad,chips",
+    description:
+      "Crispy and delicious potato chips with authentic Indian flavors. Made from premium quality potatoes and...",
+  },
+] as const;
 
-  const { data: categories } = useCategories();
-  
-  const queryParams = {
-    search: search || undefined,
-    category: activeCategory,
-    isVeg: filters.isVeg ? true : undefined,
-    isGlutenFree: filters.isGlutenFree ? true : undefined,
-    isHighProtein: filters.isHighProtein ? true : undefined,
-  };
+function BackgroundBlobs() {
+  return (
+    <>
+      <div className="pointer-events-none absolute -top-16 -right-10 h-72 w-72 rounded-full bg-rose-300/30 blur-[80px]" />
+      <div className="pointer-events-none absolute -bottom-24 -left-12 h-80 w-80 rounded-full bg-pink-200/25 blur-[90px]" />
+    </>
+  );
+}
 
-  const { data: products, isLoading } = useProducts(queryParams);
+function HeroBanner() {
+  return (
+    <section className="relative z-10">
+      <div className="mx-auto max-w-4xl rounded-[28px] border border-black/10 bg-white/50 px-6 py-10 text-center shadow-[0_18px_45px_rgba(72,35,24,0.08)] backdrop-blur-[10px] md:px-12 md:py-12">
+        <h1 className="font-serif text-4xl font-bold tracking-[-0.03em] text-[#3d2a23] md:text-5xl">
+          Our Feminine Creations
+        </h1>
+        <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#85726b] md:text-base">
+          Signature recipes crafted with the strength and creativity of women-led excellence
+        </p>
+      </div>
+    </section>
+  );
+}
 
-  const toggleFilter = (key: keyof typeof filters) => {
-    setFilters(prev => ({ ...prev, [key]: !prev[key] }));
-  };
+function ProductCard({
+  product,
+}: {
+  product: (typeof products)[number];
+}) {
+  const buttonLabel = "+ ADD TO ORDER";
+  const priceLabel = product.price ? `₹${product.price}` : "Coming Soon";
 
   return (
-    <Layout>
-      {/* Hero Section - Premium Animated Slider */}
-      <HeroSlider />
+    <article className="overflow-hidden rounded-2xl bg-[#fffdfa] shadow-[0_16px_38px_rgba(85,51,44,0.08)] transition-transform duration-300 hover:-translate-y-1">
+      <div className="relative">
+        <img
+          src={product.image}
+          alt={product.name}
+          className="h-[200px] w-full object-cover"
+          loading="lazy"
+        />
+        {product.isVeg ? (
+          <span className="absolute left-4 top-4 rounded-full bg-[#2e7d32] px-3 py-1 text-xs font-semibold text-white">
+            Veg
+          </span>
+        ) : null}
+        <button
+          type="button"
+          aria-label={`More information about ${product.name}`}
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-[#6e544d] backdrop-blur-sm"
+        >
+          <Info className="h-4 w-4" />
+        </button>
+        <span className="absolute bottom-3 right-3 rounded-full bg-[#8B1A1A] px-4 py-1.5 text-sm font-semibold text-white shadow-md">
+          {priceLabel}
+        </span>
+      </div>
 
-      {/* Main Content */}
-      <section className="px-4 md:px-6 lg:px-8 py-8 lg:py-12 w-full max-w-7xl mx-auto">
-        
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input 
-              type="text"
-              placeholder="Search for papad, pickles, drinks..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-12 h-14 rounded-2xl text-lg shadow-md border-border/50 focus:border-primary"
-            />
-          </div>
-        </div>
-
-        {/* Categories & Filters */}
-        <div className="flex flex-col gap-4 mb-6 w-full">
-          <div className="overflow-x-auto pb-4 -mb-4 hide-scrollbar w-full">
-          <div className="flex gap-2">
-              <button
-                onClick={() => setActiveCategory(undefined)}
-                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
-                  !activeCategory 
-                    ? 'bg-foreground text-background shadow-md' 
-                    : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setActiveCategory('papad')}
-                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
-                  activeCategory === 'papad' 
-                    ? 'bg-foreground text-background shadow-md' 
-                    : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
-                }`}
-              >
-                Papad
-              </button>
-              <button
-                onClick={() => setActiveCategory('pickles-achaar')}
-                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
-                  activeCategory === 'pickles-achaar' 
-                    ? 'bg-foreground text-background shadow-md' 
-                    : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
-                }`}
-              >
-                Pickles
-              </button>
-              <button
-                onClick={() => setActiveCategory('chips')}
-                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
-                  activeCategory === 'chips' 
-                    ? 'bg-foreground text-background shadow-md' 
-                    : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
-                }`}
-              >
-                Chips
-              </button>
-              <button
-                onClick={() => setActiveCategory('healthy-drinks')}
-                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
-                  activeCategory === 'healthy-drinks' 
-                    ? 'bg-foreground text-background shadow-md' 
-                    : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
-                }`}
-              >
-                Drinks
-              </button>
-              {categories?.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.slug)}
-                  className={`whitespace-nowrap px-4 py-2 rounded-full font-medium text-sm transition-all ${
-                    activeCategory === cat.slug 
-                      ? 'bg-foreground text-background shadow-md' 
-                      : 'bg-white text-secondary hover:bg-secondary/5 border border-border/50'
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap bg-white p-2 rounded-2xl border border-border/50 shadow-sm">
-            <div className="px-3 py-1 flex items-center gap-2 text-sm font-medium text-muted-foreground border-r border-border">
-              <Filter className="w-4 h-4" /> Filters
-            </div>
-            <button 
-              onClick={() => toggleFilter('isVeg')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${filters.isVeg ? 'bg-emerald-100 text-emerald-800' : 'hover:bg-secondary/5 text-secondary'}`}
-            >
-              Veg
-            </button>
-            <button 
-              onClick={() => toggleFilter('isGlutenFree')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${filters.isGlutenFree ? 'bg-amber-100 text-amber-800' : 'hover:bg-secondary/5 text-secondary'}`}
-            >
-              GF
-            </button>
-            <button 
-              onClick={() => toggleFilter('isHighProtein')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${filters.isHighProtein ? 'bg-rose-100 text-rose-800' : 'hover:bg-secondary/5 text-secondary'}`}
-            >
-              Protein
-            </button>
-          </div>
-        </div>
-
-        {/* Product Grid */}
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-32 text-primary">
-            <Loader2 className="w-12 h-12 animate-spin mb-4" />
-            <p className="font-medium">Preparing the menu...</p>
-          </div>
-        ) : products && products.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {products.map((product, i) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-3xl p-16 text-center border border-border/50 shadow-sm max-w-2xl mx-auto mt-12">
-            <div className="w-20 h-20 bg-secondary/5 rounded-full flex items-center justify-center mx-auto mb-6">
-              <ChefHat className="w-10 h-10 text-secondary/40" />
-            </div>
-            <h3 className="text-2xl font-display font-semibold text-foreground mb-3">No dishes found</h3>
-            <p className="text-muted-foreground mb-8">We couldn't find anything matching your current filters. Try adjusting your search.</p>
-            <Button 
-              onClick={() => {
-                setSearch("");
-                setActiveCategory(undefined);
-                setFilters({ isVeg: false, isGlutenFree: false, isHighProtein: false });
+      <div className="space-y-4 px-5 py-5">
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#9c706d]">
+            {product.category}
+          </p>
+          <h2 className="font-serif text-[1.35rem] font-bold leading-tight text-[#3b2721]">
+            {product.name}
+          </h2>
+          {product.description ? (
+            <p
+              className="text-sm leading-6 text-[#9a8a84]"
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
               }}
-              variant="outline"
-              className="rounded-full border-border/50"
             >
-              Clear all filters
-            </Button>
-          </div>
-        )}
-      </section>
+              {product.description}
+            </p>
+          ) : (
+            <div className="h-12" />
+          )}
+          <p className="text-sm text-[#9e8b85]">{product.seller || "\u00A0"}</p>
+        </div>
+
+        <button
+          type="button"
+          className="w-full rounded-lg bg-[#8B1A1A] px-4 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-white transition-colors duration-200 hover:bg-[#741515]"
+        >
+          {buttonLabel}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function ProductGrid() {
+  return (
+    <section className="relative z-10 mt-10">
+      <div
+        className="grid gap-6"
+        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}
+      >
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function MenuPage() {
+  return (
+    <section className="relative isolate min-h-screen overflow-hidden bg-[#f5f0ea] px-4 py-10 md:px-8 md:py-14">
+      <BackgroundBlobs />
+      <div className="relative mx-auto max-w-6xl">
+        <HeroBanner />
+        <ProductGrid />
+      </div>
+    </section>
+  );
+}
+
+export default function Home() {
+  return (
+    <Layout>
+      <MenuPage />
     </Layout>
   );
 }
