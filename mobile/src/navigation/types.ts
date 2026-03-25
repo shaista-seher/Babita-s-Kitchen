@@ -8,13 +8,13 @@ export type RootTabParamList = {
 };
 
 export type RootStackParamList = {
+  AuthScreen: undefined;
+  OTPScreen: { phone: string; name?: string };
   MainTabs: undefined;
   DishDetails: { id: string };
   Checkout: undefined;
   OrderSuccess: { orderId: string };
   Contact: undefined;
   Admin: undefined;
-  Login: undefined;
-  Signup: undefined;
   Policy: { type: PolicyType };
 };

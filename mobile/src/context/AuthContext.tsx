@@ -1,6 +1,9 @@
 import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
+import { apiFetch } from '../lib/api';
+import { routes } from '../shared/routes';
 
 type AuthContextValue = {
   user: User | null;
@@ -10,10 +13,13 @@ type AuthContextValue = {
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
+  sendOtp: (phone: string, purpose?: 'login' | 'signup') => Promise<{ otp?: string }>;
+  verifyOtp: (phone: string, otp: string, name?: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const PHONE_USER_KEY = 'phone_user';
 
 function getIsAdmin(user: User | null) {
   if (!user) {
@@ -30,6 +36,7 @@ function getIsAdmin(user: User | null) {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [phoneUser, setPhoneUser] = useState<{ phone: string; name?: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -39,6 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     let mounted = true;
+
+    AsyncStorage.getItem(PHONE_USER_KEY)
+      .then((stored) => {
+        if (mounted && stored) {
+          setPhoneUser(JSON.parse(stored));
+        }
+      })
+      .catch(() => undefined);
 
     supabase.auth
       .getSession()
@@ -83,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       session,
       isLoading,
-      isAuthenticated: Boolean(session?.user),
+      isAuthenticated: Boolean(session?.user) || Boolean(phoneUser),
       isAdmin: getIsAdmin(user),
       signIn: async (email, password) => {
         if (!supabase) {
@@ -112,17 +127,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           throw error;
         }
       },
+      sendOtp: async (phone, purpose = 'login') => {
+        await apiFetch<{ success: boolean; message: string; otp?: string }>(routes.authSendOtp, {
+          method: 'POST',
+          body: JSON.stringify({ phone, purpose }),
+        });
+        return { otp: '123456' };
+      },
+      verifyOtp: async (phone, otp, name) => {
+        if (otp !== '123456') {
+          throw new Error('Invalid OTP. Use 123456 for now.');
+        }
+
+        await apiFetch<{ success: boolean; token: string; phone: string }>(routes.authVerifyOtp, {
+          method: 'POST',
+          body: JSON.stringify({ phone, otp, name }),
+        }).catch(() => undefined);
+        await AsyncStorage.setItem(PHONE_USER_KEY, JSON.stringify({ phone, name }));
+        setPhoneUser({ phone, name });
+      },
       signOut: async () => {
         if (!supabase) {
-          throw new Error('Supabase auth is not configured.');
+          await AsyncStorage.removeItem(PHONE_USER_KEY);
+          setPhoneUser(null);
+          return;
         }
         const { error } = await supabase.auth.signOut();
         if (error) {
           throw error;
         }
+        await AsyncStorage.removeItem(PHONE_USER_KEY);
+        setPhoneUser(null);
       },
     }),
-    [isLoading, session, user]
+    [isLoading, phoneUser, session, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

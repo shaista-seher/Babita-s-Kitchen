@@ -18,11 +18,11 @@ import CheckoutScreen from '../screens/CheckoutScreen';
 import ContactScreen from '../screens/ContactScreen';
 import DishDetailsScreen from '../screens/DishDetailsScreen';
 import HomeScreen from '../screens/HomeScreen';
-import LoginScreen from '../screens/LoginScreen';
 import MenuScreen from '../screens/MenuScreen';
 import OrderSuccessScreen from '../screens/OrderSuccessScreen';
 import PolicyScreen from '../screens/PolicyScreen';
-import SignupScreen from '../screens/SignupScreen';
+import AuthScreen from '../screens/AuthScreen';
+import OTPScreen from '../screens/OTPScreen';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { RootStackParamList, RootTabParamList } from './types';
@@ -134,15 +134,15 @@ function TabIcon({
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="AuthScreen" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="AuthScreen" component={AuthScreen} />
+        <Stack.Screen name="OTPScreen" component={OTPScreen} />
         <Stack.Screen name="MainTabs" component={TabsNavigator} />
         <Stack.Screen name="DishDetails" component={DishDetailsScreen} />
         <Stack.Screen name="Checkout" component={CheckoutScreen} />
         <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
         <Stack.Screen name="Contact" component={ContactScreen} />
         <Stack.Screen name="Admin" component={AdminScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="Policy" component={PolicyScreen} />
       </Stack.Navigator>
     </NavigationContainer>

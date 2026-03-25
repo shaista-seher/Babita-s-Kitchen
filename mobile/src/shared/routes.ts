@@ -18,6 +18,8 @@ export const buildUrl = (
 };
 
 export const routes = {
+  authSendOtp: '/api/auth/send-otp',
+  authVerifyOtp: '/api/auth/verify-otp',
   dishes: '/api/dishes',
   dish: '/api/dishes/:id',
   orders: '/api/orders',
