@@ -4,7 +4,13 @@
     "slug": "babitas-kitchen-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8F4EC"
+    },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -14,8 +20,15 @@
     "ios": {
       "supportsTablet": true
     },
-    "android": {},
-    "web": {},
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
     "plugins": [
       "expo-av"
     ],
