@@ -5,14 +5,11 @@ import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { BackgroundBlobs } from '../components/BackgroundBlobs';
-import { EmptyState } from '../components/EmptyState';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SectionHeader } from '../components/SectionHeader';
 import { useCart } from '../hooks/useCart';
-import { colors } from '../theme/colors';
+import { colors, radius, shadows, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius, spacing } from '../theme/spacing';
-import { shadow } from '../theme/shadow';
 import { formatPrice } from '../utils/formatPrice';
 
 export default function CartScreen() {
@@ -26,15 +23,33 @@ export default function CartScreen() {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.container}>
-          <BackgroundBlobs />
-          <EmptyState
-            icon="shopping-cart"
-            title="Your cart is empty"
-            message="Add something handmade and comforting to begin your order."
-            actionLabel="Browse Menu"
-            actionVariant="ghost"
-            onAction={() => navigation.navigate('MainTabs', { screen: 'Menu' })}
-          />
+          <BackgroundBlobs softened />
+          <View style={styles.emptyWrap}>
+            <Feather name="feather" size={18} color={colors.primary} style={styles.emptyLeaf} />
+            <View style={styles.illustrationWrap}>
+              <View style={styles.basketHandle} />
+              <View style={styles.basketBody}>
+                <View style={styles.basketStripe} />
+                <View style={styles.basketStripe} />
+                <View style={styles.basketStripe} />
+              </View>
+            </View>
+            <Text style={styles.emptyTitle}>Your cart is empty</Text>
+            <Text style={styles.emptyBody}>
+              Discover handmade goodness from Babita&apos;s Kitchen and add your favourites here.
+            </Text>
+            <PrimaryButton
+              title="Browse Menu"
+              icon="arrow-right"
+              onPress={() => navigation.navigate('MainTabs', { screen: 'Menu' })}
+              style={styles.emptyButton}
+            />
+            <View style={styles.emptyDots}>
+              <View style={styles.emptyDot} />
+              <View style={styles.emptyDot} />
+              <View style={styles.emptyDot} />
+            </View>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -43,7 +58,7 @@ export default function CartScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
-        <BackgroundBlobs />
+        <BackgroundBlobs softened />
         <FlatList
           data={items}
           keyExtractor={(item, index) => `${item.dish.id}-${item.selectedAddon?.id ?? 'base'}-${index}`}
@@ -51,7 +66,7 @@ export default function CartScreen() {
           contentContainerStyle={styles.content}
           ListHeaderComponent={
             <View style={styles.headerWrap}>
-              <SectionHeader title="Your Cart" subtitle="Review quantities before you place the order." />
+              <SectionHeader title="Your cart" subtitle="Review quantities before you place the order." />
               <View style={styles.countChip}>
                 <Text style={styles.countChipText}>{items.length} items</Text>
               </View>
@@ -62,18 +77,26 @@ export default function CartScreen() {
               <Image source={{ uri: item.dish.imageUrl }} style={styles.thumb} contentFit="cover" />
               <View style={styles.rowBody}>
                 <Text style={styles.rowCategory}>{item.dish.category}</Text>
-                <Text style={styles.rowTitle}>{item.dish.name}</Text>
-                <Text style={styles.rowMeta}>
+                <Text style={styles.rowTitle} numberOfLines={2}>
+                  {item.dish.name}
+                </Text>
+                <Text style={styles.rowMeta} numberOfLines={2}>
                   {item.selectedAddon ? `Flavour: ${item.selectedAddon.name}` : 'Handmade kitchen special'}
                 </Text>
                 <Text style={styles.rowPrice}>{formatPrice(item.unitPrice)}</Text>
                 <View style={styles.rowActions}>
                   <View style={styles.stepper}>
-                    <Pressable style={styles.stepperButton} onPress={() => updateQuantity(item.dish.id, item.quantity - 1)}>
+                    <Pressable
+                      style={({ pressed }) => [styles.stepperButton, pressed && styles.pressed]}
+                      onPress={() => updateQuantity(item.dish.id, item.quantity - 1)}
+                    >
                       <Text style={styles.stepperLabel}>-</Text>
                     </Pressable>
                     <Text style={styles.stepperCount}>{item.quantity}</Text>
-                    <Pressable style={styles.stepperButton} onPress={() => updateQuantity(item.dish.id, item.quantity + 1)}>
+                    <Pressable
+                      style={({ pressed }) => [styles.stepperButton, pressed && styles.pressed]}
+                      onPress={() => updateQuantity(item.dish.id, item.quantity + 1)}
+                    >
                       <Text style={styles.stepperLabel}>+</Text>
                     </Pressable>
                   </View>
@@ -84,14 +107,15 @@ export default function CartScreen() {
                         { text: 'Remove', style: 'destructive', onPress: () => removeFromCart(item.dish.id) },
                       ])
                     }
-                    style={styles.deleteButton}
+                    style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
                   >
-                    <Feather name="trash-2" size={18} color="#c0b8b0" />
+                    <Feather name="trash-2" size={18} color={colors.textMuted} />
                   </Pressable>
                 </View>
               </View>
             </View>
           )}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
           ListFooterComponent={
             <>
               <View style={styles.summaryCard}>
@@ -101,7 +125,12 @@ export default function CartScreen() {
                 <View style={styles.summaryDivider} />
                 <SummaryRow label="Total" value={formatPrice(total)} emphasis />
               </View>
-              <PrimaryButton title="Proceed to Checkout" onPress={() => navigation.navigate('Checkout')} style={styles.checkoutButton} />
+              <PrimaryButton
+                title="Proceed to checkout"
+                icon="arrow-right"
+                onPress={() => navigation.navigate('Checkout')}
+                style={styles.checkoutButton}
+              />
             </>
           }
         />
@@ -120,73 +149,160 @@ function SummaryRow({ label, value, emphasis }: { label: string; value: string; 
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.cream },
-  container: { flex: 1, backgroundColor: colors.cream },
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  emptyWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.screen,
+    paddingBottom: spacing.dockClearance,
+  },
+  emptyLeaf: {
+    marginBottom: spacing.xs,
+  },
+  illustrationWrap: {
+    width: 132,
+    height: 132,
+    borderRadius: 66,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  basketHandle: {
+    width: 54,
+    height: 26,
+    borderWidth: 3,
+    borderColor: colors.borderStrong,
+    borderBottomWidth: 0,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+  },
+  basketBody: {
+    width: 72,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: '#E6C7A8',
+    borderWidth: 2,
+    borderColor: colors.borderStrong,
+    marginTop: -2,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  basketStripe: {
+    width: 8,
+    height: 28,
+    borderRadius: 4,
+    backgroundColor: '#D6A97A',
+  },
+  emptyTitle: {
+    color: colors.textHeading,
+    fontFamily: fonts.serifBold,
+    fontSize: 26,
+    lineHeight: 32,
+    textAlign: 'center',
+  },
+  emptyBody: {
+    marginTop: spacing.xs,
+    color: colors.textMuted,
+    fontFamily: fonts.body,
+    fontSize: typeScale.body.size,
+    lineHeight: typeScale.body.lineHeight,
+    textAlign: 'center',
+    maxWidth: 300,
+  },
+  emptyButton: {
+    marginTop: spacing.md,
+    minWidth: 220,
+  },
+  emptyDots: {
+    marginTop: spacing.lg,
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  emptyDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.primaryDust,
+  },
   content: {
-    paddingHorizontal: 16,
-    paddingBottom: spacing.xxl,
+    paddingHorizontal: spacing.screen,
+    paddingBottom: spacing.dockClearance,
   },
   headerWrap: {
+    marginTop: spacing.md,
     marginBottom: spacing.md,
   },
   countChip: {
     alignSelf: 'flex-start',
-    marginTop: 8,
+    marginTop: spacing.xs,
     borderRadius: radius.full,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs + 2,
+    backgroundColor: colors.primarySoft,
   },
   countChipText: {
-    color: colors.white,
+    color: colors.primary,
     fontFamily: fonts.bodyBold,
-    fontSize: 12,
+    fontSize: typeScale.support.size,
   },
   rowCard: {
     flexDirection: 'row',
-    padding: 14,
-    marginBottom: 10,
-    borderRadius: 16,
-    backgroundColor: colors.white,
-    ...shadow.soft,
+    padding: spacing.sm,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+    ...shadows.card,
   },
   thumb: {
-    width: 72,
-    height: 72,
-    borderRadius: 12,
-    backgroundColor: '#e8ddd4',
+    width: 84,
+    height: 84,
+    borderRadius: radius.md,
+    backgroundColor: colors.border,
   },
   rowBody: {
     flex: 1,
-    marginLeft: 14,
+    marginLeft: spacing.sm,
   },
   rowCategory: {
-    fontSize: 10,
-    color: colors.primary,
+    fontSize: typeScale.micro.size,
+    lineHeight: typeScale.micro.lineHeight,
+    color: colors.primaryMuted,
     fontFamily: fonts.bodyBold,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
   },
   rowTitle: {
-    marginTop: 2,
+    marginTop: spacing.xxs,
     color: colors.textHeading,
-    fontFamily: fonts.serifBold,
-    fontSize: 15,
+    fontFamily: fonts.bodyBold,
+    fontSize: 16,
+    lineHeight: 22,
   },
   rowMeta: {
-    marginTop: 4,
+    marginTop: spacing.xxs,
     color: colors.textMuted,
     fontFamily: fonts.body,
-    fontSize: 12,
+    fontSize: typeScale.support.size,
+    lineHeight: typeScale.support.lineHeight,
   },
   rowPrice: {
-    marginTop: 6,
+    marginTop: spacing.xs,
     color: colors.primary,
     fontFamily: fonts.bodyMedium,
-    fontSize: 14,
+    fontSize: typeScale.body.size,
   },
   rowActions: {
-    marginTop: 12,
+    marginTop: spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -194,20 +310,20 @@ const styles = StyleSheet.create({
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: spacing.xs,
   },
   stepperButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.primaryLight,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepperLabel: {
     color: colors.primary,
     fontFamily: fonts.bodyBold,
-    fontSize: 20,
+    fontSize: 18,
   },
   stepperCount: {
     minWidth: 20,
@@ -216,39 +332,38 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
   },
   deleteButton: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
   summaryCard: {
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    padding: 20,
-    marginTop: 6,
-    ...shadow.card,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xxl,
+    padding: spacing.md,
+    marginTop: spacing.md,
+    ...shadows.card,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.xs,
   },
   summaryLabel: {
     color: colors.textMuted,
     fontFamily: fonts.body,
-    fontSize: 14,
+    fontSize: typeScale.body.size,
   },
   summaryValue: {
     color: colors.textHeading,
     fontFamily: fonts.bodyMedium,
-    fontSize: 14,
+    fontSize: typeScale.body.size,
   },
   summaryDivider: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    borderStyle: 'dashed',
-    marginVertical: 6,
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: spacing.xs,
   },
   totalLabel: {
     color: colors.textHeading,
@@ -261,7 +376,9 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   checkoutButton: {
-    marginTop: 16,
-    marginBottom: 24,
+    marginTop: spacing.md,
+  },
+  pressed: {
+    opacity: 0.75,
   },
 });

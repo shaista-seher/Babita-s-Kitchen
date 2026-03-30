@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { colors, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
 
 export function SectionHeader({
@@ -24,13 +24,14 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.textHeading,
-    fontFamily: fonts.serifBold,
-    fontSize: 24,
+    fontFamily: fonts.bodyBold,
+    fontSize: typeScale.heading.size,
+    lineHeight: typeScale.heading.lineHeight,
   },
   subtitle: {
     color: colors.textMuted,
     fontFamily: fonts.body,
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: typeScale.support.size,
+    lineHeight: typeScale.support.lineHeight,
   },
 });

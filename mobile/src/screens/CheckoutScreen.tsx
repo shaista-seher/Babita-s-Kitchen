@@ -28,10 +28,8 @@ import {
 } from '../hooks/usePayment';
 import { openRazorpayCheckout } from '../lib/razorpay';
 import { checkoutSchema, DeliveryDetails } from '../shared/schema';
-import { colors } from '../theme/colors';
+import { colors, radius, shadows, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius, spacing } from '../theme/spacing';
-import { shadow } from '../theme/shadow';
 import { formatPrice } from '../utils/formatPrice';
 
 type Step = 'details' | 'payment';
@@ -112,7 +110,7 @@ export default function CheckoutScreen() {
       const paymentResult = await openRazorpayCheckout({
         amount: paymentOrder.amount,
         currency: paymentOrder.currency,
-        description: 'Babita\'s Kitchen order payment',
+        description: "Babita's Kitchen order payment",
         key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID ?? '',
         name: "Babita's Kitchen",
         order_id: paymentOrder.orderId,
@@ -161,25 +159,27 @@ export default function CheckoutScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
-        <BackgroundBlobs />
+        <BackgroundBlobs softened />
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.select({ ios: 'padding', android: undefined })}
         >
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-            <View style={styles.stepIndicator}>
-              <StepNode label="Details" active={currentStep === 'details'} />
-              <View style={styles.stepLine} />
-              <StepNode label="Payment" active={currentStep === 'payment'} />
+            <View style={styles.header}>
+              <SectionHeader
+                title={currentStep === 'details' ? 'Delivery details' : 'Payment method'}
+                subtitle={
+                  currentStep === 'details'
+                    ? 'A cleaner checkout, with the same warm service behind it.'
+                    : 'Choose how you would like to complete the order.'
+                }
+              />
+              <View style={styles.stepIndicator}>
+                <StepNode label="Details" active={currentStep === 'details'} />
+                <View style={styles.stepLine} />
+                <StepNode label="Payment" active={currentStep === 'payment'} />
+              </View>
             </View>
-            <SectionHeader
-              title={currentStep === 'details' ? 'Delivery details' : 'Payment method'}
-              subtitle={
-                currentStep === 'details'
-                  ? 'Tell us where to send your order.'
-                  : 'Choose how you want to complete the order.'
-              }
-            />
 
             {currentStep === 'details' ? (
               <View style={styles.formCard}>
@@ -217,7 +217,8 @@ export default function CheckoutScreen() {
                 />
 
                 <PrimaryButton
-                  title="Continue to Payment"
+                  title="Continue to payment"
+                  icon="arrow-right"
                   onPress={handleSubmit((values) => {
                     setDeliveryDetails(values);
                     setCurrentStep('payment');
@@ -230,14 +231,14 @@ export default function CheckoutScreen() {
                   <PaymentOption
                     icon="credit-card"
                     title="Cash on Delivery"
-                    subtitle="Pay at door"
+                    subtitle="Pay at the doorstep"
                     selected={paymentMethod === 'cod'}
                     onPress={() => setPaymentMethod('cod')}
                   />
                   <PaymentOption
                     icon="smartphone"
                     title="Razorpay"
-                    subtitle="Pay online"
+                    subtitle="Pay securely online"
                     selected={paymentMethod === 'razorpay'}
                     onPress={() => setPaymentMethod('razorpay')}
                   />
@@ -251,7 +252,7 @@ export default function CheckoutScreen() {
                 </View>
 
                 <PrimaryButton
-                  title="Place Order"
+                  title="Place order"
                   onPress={handlePlaceOrder}
                   loading={
                     createOrder.isPending ||
@@ -261,7 +262,10 @@ export default function CheckoutScreen() {
                   }
                 />
 
-                <Pressable onPress={() => setCurrentStep('details')}>
+                <Pressable
+                  style={({ pressed }) => [styles.backLinkWrap, pressed && styles.pressed]}
+                  onPress={() => setCurrentStep('details')}
+                >
                   <Text style={styles.backLink}>Back to details</Text>
                 </Pressable>
               </View>
@@ -330,9 +334,16 @@ function PaymentOption({
   onPress: () => void;
 }) {
   return (
-    <Pressable style={[styles.paymentOption, selected && styles.paymentOptionSelected]} onPress={onPress}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.paymentOption,
+        selected && styles.paymentOptionSelected,
+        pressed && styles.pressed,
+      ]}
+      onPress={onPress}
+    >
       <View style={styles.paymentIconCircle}>
-        <Feather name={icon} size={22} color={colors.primary} />
+        <Feather name={icon} size={20} color={colors.primary} />
       </View>
       <View style={styles.paymentBody}>
         <Text style={[styles.paymentTitle, selected && styles.paymentTitleSelected]}>{title}</Text>
@@ -372,21 +383,17 @@ function SummaryRow({
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.cream,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.cream,
-  },
-  flex: {
-    flex: 1,
-  },
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background },
+  flex: { flex: 1 },
   content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.lg,
+    paddingHorizontal: spacing.screen,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
+    gap: spacing.md,
+  },
+  header: {
+    gap: spacing.md,
   },
   stepIndicator: {
     flexDirection: 'row',
@@ -408,14 +415,14 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   stepCircleInactive: {
-    backgroundColor: colors.cream,
-    borderColor: '#d4c4bc',
+    backgroundColor: colors.background,
+    borderColor: colors.borderStrong,
   },
   stepLabel: {
-    marginTop: 8,
+    marginTop: spacing.xs,
     color: colors.textMuted,
     fontFamily: fonts.body,
-    fontSize: 12,
+    fontSize: typeScale.support.size,
   },
   stepLabelActive: {
     color: colors.primary,
@@ -425,74 +432,71 @@ const styles = StyleSheet.create({
     width: 40,
     marginTop: 11,
     borderTopWidth: 1,
-    borderTopColor: '#d4c4bc',
+    borderTopColor: colors.borderStrong,
     borderStyle: 'dashed',
   },
   formCard: {
-    borderRadius: 20,
-    backgroundColor: colors.white,
-    padding: 24,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    padding: spacing.lg,
     gap: spacing.md,
-    ...shadow.card,
+    ...shadows.card,
   },
   fieldWrap: {
-    gap: 6,
+    gap: spacing.xxs,
   },
   label: {
-    color: colors.textBody,
+    color: colors.textHeading,
     fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    fontSize: typeScale.support.size,
   },
   input: {
-    minHeight: 50,
-    borderRadius: 12,
-    backgroundColor: '#faf7f4',
-    borderWidth: 1.5,
-    borderColor: 'rgba(0,0,0,0.08)',
+    minHeight: 52,
+    borderRadius: radius.xl,
+    backgroundColor: colors.backgroundAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
     paddingHorizontal: spacing.md,
     color: colors.textHeading,
     fontFamily: fonts.body,
-    fontSize: 15,
+    fontSize: typeScale.body.size,
   },
   textArea: {
-    minHeight: 100,
+    minHeight: 104,
     paddingTop: spacing.md,
   },
   errorText: {
     color: colors.danger,
-    fontFamily: fonts.sansRegular,
-    fontSize: 12,
+    fontFamily: fonts.body,
+    fontSize: typeScale.support.size,
   },
   paymentGrid: {
-    gap: 12,
+    gap: spacing.sm,
   },
   paymentOption: {
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    backgroundColor: colors.white,
-    padding: 18,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    ...shadow.soft,
   },
   paymentOptionSelected: {
     borderColor: colors.primary,
-    backgroundColor: '#fdf5f5',
+    backgroundColor: colors.primarySoft,
   },
   paymentIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.primaryLight,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   paymentBody: {
     flex: 1,
-    marginLeft: 14,
+    marginLeft: spacing.sm,
   },
   paymentTitle: {
     color: colors.textHeading,
@@ -505,14 +509,14 @@ const styles = StyleSheet.create({
   paymentSubtitle: {
     color: colors.textMuted,
     fontFamily: fonts.body,
-    fontSize: 12,
+    fontSize: typeScale.support.size,
   },
   radioOuter: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#d4c4bc',
+    borderWidth: 1.5,
+    borderColor: colors.borderStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -526,10 +530,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   summaryCard: {
-    borderRadius: 16,
-    backgroundColor: '#faf7f4',
+    borderRadius: 20,
+    backgroundColor: colors.backgroundAlt,
     padding: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -538,30 +542,34 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     color: colors.textMuted,
-    fontFamily: fonts.sansRegular,
-    fontSize: 14,
+    fontFamily: fonts.body,
+    fontSize: typeScale.body.size,
   },
   summaryValue: {
     color: colors.textHeading,
-    fontFamily: fonts.sansMedium,
-    fontSize: 14,
+    fontFamily: fonts.bodyMedium,
+    fontSize: typeScale.body.size,
   },
   summaryEmphasisLabel: {
     color: colors.textHeading,
-    fontFamily: fonts.sansBold,
-    fontSize: 15,
+    fontFamily: fonts.serifBold,
+    fontSize: 18,
   },
   summaryEmphasisValue: {
     color: colors.primary,
-    fontFamily: fonts.sansBold,
-    fontSize: 16,
+    fontFamily: fonts.serifBold,
+    fontSize: 18,
+  },
+  backLinkWrap: {
+    alignSelf: 'center',
   },
   backLink: {
     color: colors.primary,
-    fontFamily: fonts.sansBold,
+    fontFamily: fonts.bodyBold,
     textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    fontSize: 12,
+    fontSize: typeScale.support.size,
+  },
+  pressed: {
+    opacity: 0.75,
   },
 });

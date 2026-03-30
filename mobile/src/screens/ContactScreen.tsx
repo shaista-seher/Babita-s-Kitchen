@@ -4,15 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { BackgroundBlobs } from '../components/BackgroundBlobs';
 import { SectionHeader } from '../components/SectionHeader';
-import { colors } from '../theme/colors';
+import { colors, radius, shadows, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius, spacing } from '../theme/spacing';
 
 const CONTACT_ROWS = [
   {
     icon: 'map-pin' as const,
     label: 'Location',
-    value: 'Babita\'s Kitchen, Jaipur, Rajasthan',
+    value: "Babita's Kitchen, Jaipur, Rajasthan",
     onPress: () => undefined,
   },
   {
@@ -33,15 +32,19 @@ export default function ContactScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
-        <BackgroundBlobs />
+        <BackgroundBlobs softened />
         <View style={styles.content}>
           <SectionHeader
             title="Contact us"
             subtitle="Reach us for catering, custom orders, or support with your delivery."
           />
           <View style={styles.card}>
-            {CONTACT_ROWS.map((row) => (
-              <Pressable key={row.label} style={styles.row} onPress={row.onPress}>
+            {CONTACT_ROWS.map((row, index) => (
+              <Pressable
+                key={row.label}
+                style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+                onPress={row.onPress}
+              >
                 <View style={styles.iconWrap}>
                   <Feather name={row.icon} size={18} color={colors.primary} />
                 </View>
@@ -50,6 +53,7 @@ export default function ContactScreen() {
                   <Text style={styles.rowValue}>{row.value}</Text>
                 </View>
                 <Feather name="chevron-right" size={16} color={colors.textMuted} />
+                {index < CONTACT_ROWS.length - 1 ? <View style={styles.rowDivider} /> : null}
               </Pressable>
             ))}
           </View>
@@ -62,27 +66,30 @@ export default function ContactScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.cream,
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
+    backgroundColor: colors.background,
   },
   content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.screen,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
     gap: spacing.lg,
   },
   card: {
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.94)',
-    padding: spacing.md,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    padding: spacing.sm,
+    ...shadows.card,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
     paddingVertical: spacing.md,
+    position: 'relative',
   },
   iconWrap: {
     width: 42,
@@ -90,22 +97,33 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(139,26,26,0.08)',
+    backgroundColor: colors.primarySoft,
   },
   rowBody: {
     flex: 1,
-    gap: 4,
+    gap: spacing.xxs,
   },
   rowLabel: {
     color: colors.textMuted,
-    fontFamily: fonts.sansRegular,
-    fontSize: 12,
+    fontFamily: fonts.bodyBold,
+    fontSize: typeScale.micro.size,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.1,
   },
   rowValue: {
     color: colors.textHeading,
-    fontFamily: fonts.sansMedium,
-    fontSize: 15,
+    fontFamily: fonts.bodyMedium,
+    fontSize: typeScale.body.size,
+  },
+  rowDivider: {
+    position: 'absolute',
+    bottom: 0,
+    left: 54,
+    right: 0,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+  pressed: {
+    opacity: 0.75,
   },
 });

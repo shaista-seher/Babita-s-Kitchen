@@ -8,13 +8,11 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import { BackgroundBlobs } from '../components/BackgroundBlobs';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useOrder } from '../hooks/useOrder';
-import { colors } from '../theme/colors';
+import { colors, radius, shadows, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius, spacing } from '../theme/spacing';
-import { shadow } from '../theme/shadow';
 import { formatPrice } from '../utils/formatPrice';
 
-const TIMELINE = ['Order Placed', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered'];
+const TIMELINE = ['Placed', 'Confirmed', 'Preparing', 'Out', 'Delivered'];
 
 export default function OrderSuccessScreen() {
   const navigation = useNavigation<any>();
@@ -62,28 +60,29 @@ export default function OrderSuccessScreen() {
   }));
 
   const deliveryDetails = (order as any)?.deliveryDetails ?? {};
-  const subtotal = items.reduce((sum: number, item: (typeof items)[number]) => sum + item.price * item.quantity, 0);
+  const subtotal = items.reduce(
+    (sum: number, item: (typeof items)[number]) => sum + item.price * item.quantity,
+    0
+  );
   const gst = subtotal * 0.05;
   const total = Number((order as any)?.total ?? Math.round(subtotal + gst));
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
-        <BackgroundBlobs />
+        <BackgroundBlobs softened />
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <>
               <Animated.View style={[styles.checkWrap, checkStyle]}>
-                <Feather name="check-circle" size={44} color={colors.primary} />
+                <Feather name="check" size={32} color={colors.primary} />
               </Animated.View>
-              <Text style={styles.title}>Order Confirmed!</Text>
+              <Text style={styles.title}>Order confirmed</Text>
               <Text style={styles.orderId}>Order #{route.params?.orderId}</Text>
-              <View style={styles.badgeRow}>
-                <Badge label={String((order as any)?.status ?? 'pending')} confirmed />
-              </View>
               <View style={styles.timelineWrap}>
                 {TIMELINE.map((step, index) => {
                   const completed = index < timelineIndex;
@@ -91,12 +90,36 @@ export default function OrderSuccessScreen() {
                   return (
                     <React.Fragment key={step}>
                       <View style={styles.timelineStep}>
-                        <View style={[styles.timelineCircle, completed && styles.timelineCircleDone, current && styles.timelineCircleCurrent]}>
-                          {completed ? <Feather name="check" size={10} color={colors.white} /> : current ? <View style={styles.timelineDotCurrent} /> : null}
+                        <View
+                          style={[
+                            styles.timelineCircle,
+                            completed && styles.timelineCircleDone,
+                            current && styles.timelineCircleCurrent,
+                          ]}
+                        >
+                          {completed ? (
+                            <Feather name="check" size={10} color={colors.white} />
+                          ) : current ? (
+                            <View style={styles.timelineDotCurrent} />
+                          ) : null}
                         </View>
-                        <Text style={[styles.timelineLabel, (completed || current) && styles.timelineLabelActive]}>{step}</Text>
+                        <Text
+                          style={[
+                            styles.timelineLabel,
+                            (completed || current) && styles.timelineLabelActive,
+                          ]}
+                        >
+                          {step}
+                        </Text>
                       </View>
-                      {index < TIMELINE.length - 1 ? <View style={[styles.timelineConnector, index < timelineIndex && styles.timelineConnectorDone]} /> : null}
+                      {index < TIMELINE.length - 1 ? (
+                        <View
+                          style={[
+                            styles.timelineConnector,
+                            index < timelineIndex && styles.timelineConnectorDone,
+                          ]}
+                        />
+                      ) : null}
                     </React.Fragment>
                   );
                 })}
@@ -115,12 +138,15 @@ export default function OrderSuccessScreen() {
             <View style={styles.itemRow}>
               <Image source={{ uri: item.imageUrl }} style={styles.itemImage} contentFit="cover" />
               <View style={styles.itemBody}>
-                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemName} numberOfLines={2}>
+                  {item.name}
+                </Text>
                 <Text style={styles.itemMeta}>Qty {item.quantity}</Text>
               </View>
               <Text style={styles.itemPrice}>{formatPrice(item.price * item.quantity)}</Text>
             </View>
           )}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
           ListFooterComponent={
             <>
               <View style={styles.card}>
@@ -129,20 +155,16 @@ export default function OrderSuccessScreen() {
                 <SummaryRow label="GST (5%)" value={formatPrice(gst)} />
                 <SummaryRow label="Total" value={formatPrice(total)} emphasis />
               </View>
-              <PrimaryButton title="Back to Menu" onPress={() => navigation.navigate('MainTabs', { screen: 'Menu' })} style={styles.backButton} />
+              <PrimaryButton
+                title="Back to menu"
+                onPress={() => navigation.navigate('MainTabs', { screen: 'Menu' })}
+                style={styles.backButton}
+              />
             </>
           }
         />
       </View>
     </SafeAreaView>
-  );
-}
-
-function Badge({ label, confirmed }: { label: string; confirmed?: boolean }) {
-  return (
-    <View style={[styles.badge, confirmed ? styles.badgeConfirmed : styles.badgePending]}>
-      <Text style={[styles.badgeText, confirmed ? styles.badgeTextConfirmed : styles.badgeTextPending]}>{label}</Text>
-    </View>
   );
 }
 
@@ -156,68 +178,46 @@ function SummaryRow({ label, value, emphasis }: { label: string; value: string; 
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.cream },
-  loadingSafeArea: { flex: 1, backgroundColor: colors.cream, alignItems: 'center', justifyContent: 'center' },
-  container: { flex: 1, backgroundColor: colors.cream },
-  content: { paddingHorizontal: 16, paddingBottom: spacing.xxl },
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  loadingSafeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { paddingHorizontal: spacing.screen, paddingBottom: spacing.xxl, paddingTop: spacing.md },
   checkWrap: {
     alignSelf: 'center',
-    marginTop: spacing.sm,
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: colors.primaryLight,
+    marginTop: spacing.xs,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   title: {
-    marginTop: 20,
+    marginTop: spacing.md,
     textAlign: 'center',
     fontFamily: fonts.serifBold,
     fontSize: 30,
     color: colors.textHeading,
   },
   orderId: {
-    marginTop: 6,
+    marginTop: spacing.xxs,
     textAlign: 'center',
     color: colors.textMuted,
     fontFamily: fonts.body,
-    fontSize: 13,
-    letterSpacing: 1,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 14,
-  },
-  badge: {
-    borderRadius: radius.full,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-  },
-  badgeConfirmed: {
-    backgroundColor: '#e8f5e9',
-  },
-  badgePending: {
-    backgroundColor: '#fff8e1',
-  },
-  badgeText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    textTransform: 'capitalize',
-  },
-  badgeTextConfirmed: {
-    color: colors.vegGreen,
-  },
-  badgeTextPending: {
-    color: '#f57f17',
+    fontSize: typeScale.support.size,
+    letterSpacing: 0.5,
   },
   timelineWrap: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginTop: 22,
-    marginBottom: 18,
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
   },
   timelineStep: {
     width: 56,
@@ -227,9 +227,9 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#d4c4bc',
-    backgroundColor: colors.cream,
+    borderWidth: 1.5,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -249,96 +249,95 @@ const styles = StyleSheet.create({
   timelineConnector: {
     flex: 1,
     marginTop: 9,
-    borderTopWidth: 2,
-    borderTopColor: '#d4c4bc',
+    borderTopWidth: 1.5,
+    borderTopColor: colors.borderStrong,
     borderStyle: 'dashed',
   },
   timelineConnectorDone: {
     borderTopColor: colors.primary,
   },
   timelineLabel: {
-    marginTop: 8,
+    marginTop: spacing.xs,
     textAlign: 'center',
     color: colors.textMuted,
     fontFamily: fonts.body,
-    fontSize: 10,
+    fontSize: typeScale.micro.size,
   },
   timelineLabelActive: {
     color: colors.textHeading,
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
-    ...shadow.card,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    borderRadius: 24,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...shadows.card,
   },
   cardTitle: {
     color: colors.textHeading,
-    fontFamily: fonts.serifBold,
-    fontSize: 22,
-    marginBottom: 8,
+    fontFamily: fonts.bodyBold,
+    fontSize: 18,
+    marginBottom: spacing.xs,
   },
   cardText: {
     color: colors.textBody,
     fontFamily: fonts.body,
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: typeScale.body.size,
+    lineHeight: typeScale.body.lineHeight,
   },
   sectionTitle: {
     color: colors.textHeading,
-    fontFamily: fonts.serifBold,
-    fontSize: 24,
-    marginBottom: 4,
+    fontFamily: fonts.bodyBold,
+    fontSize: 18,
+    marginBottom: spacing.xs,
   },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 10,
-    ...shadow.soft,
+    gap: spacing.sm,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    borderRadius: 20,
+    padding: spacing.sm,
+    ...shadows.soft,
   },
   itemImage: {
     width: 56,
     height: 56,
     borderRadius: 12,
-    backgroundColor: '#e8ddd4',
+    backgroundColor: colors.border,
   },
   itemBody: {
     flex: 1,
   },
   itemName: {
     fontFamily: fonts.bodyBold,
-    fontSize: 14,
+    fontSize: typeScale.body.size,
     color: colors.textHeading,
   },
   itemMeta: {
-    marginTop: 4,
+    marginTop: spacing.xxs,
     fontFamily: fonts.body,
-    fontSize: 12,
+    fontSize: typeScale.support.size,
     color: colors.textMuted,
   },
   itemPrice: {
     fontFamily: fonts.bodyBold,
-    fontSize: 14,
+    fontSize: typeScale.body.size,
     color: colors.primary,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: spacing.xs,
   },
   summaryLabel: {
     fontFamily: fonts.body,
-    fontSize: 14,
+    fontSize: typeScale.body.size,
     color: colors.textMuted,
   },
   summaryValue: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 14,
+    fontSize: typeScale.body.size,
     color: colors.textHeading,
   },
   summaryLabelStrong: {
@@ -348,10 +347,10 @@ const styles = StyleSheet.create({
   },
   summaryValueStrong: {
     fontFamily: fonts.serifBold,
-    fontSize: 22,
+    fontSize: 20,
     color: colors.primary,
   },
   backButton: {
-    marginBottom: 32,
+    marginBottom: spacing.lg,
   },
 });

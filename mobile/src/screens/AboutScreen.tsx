@@ -4,9 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { BackgroundBlobs } from '../components/BackgroundBlobs';
-import { colors } from '../theme/colors';
+import { colors, spacing } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { spacing } from '../theme/spacing';
 import { shadow } from '../theme/shadow';
 
 const TEAM = [
@@ -85,9 +84,9 @@ function ValueRow({ icon, title, text }: { icon: keyof typeof Feather.glyphMap; 
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.cream },
-  container: { flex: 1, backgroundColor: colors.cream },
-  content: { paddingBottom: spacing.xxl },
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { paddingBottom: spacing.dockClearance },
   heroImage: { width: '100%', height: 240 },
   title: {
     marginTop: 24,

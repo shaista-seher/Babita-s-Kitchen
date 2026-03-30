@@ -7,8 +7,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { colors } from '../theme/colors';
-import { radius, spacing } from '../theme/spacing';
+import { colors, radius, shadows, spacing } from '../constants/theme';
 
 export function SkeletonCard() {
   const opacity = useSharedValue(0.4);
@@ -45,26 +44,28 @@ export function SkeletonCard() {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    borderRadius: radius.lg,
-    backgroundColor: colors.cardBg,
+    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
     overflow: 'hidden',
-    marginBottom: spacing.md,
+    ...shadows.soft,
   },
   image: {
-    height: 160,
-    backgroundColor: '#ece4dd',
+    aspectRatio: 4 / 3,
+    backgroundColor: '#EFE4DA',
   },
   body: {
-    padding: spacing.md,
+    padding: spacing.sm,
     gap: spacing.sm,
   },
   line: {
-    borderRadius: radius.sm,
-    backgroundColor: '#ece4dd',
+    borderRadius: radius.md,
+    backgroundColor: '#EFE4DA',
   },
   button: {
-    height: 40,
-    borderRadius: radius.sm,
-    backgroundColor: '#ece4dd',
+    height: 28,
+    width: 28,
+    borderRadius: 14,
+    backgroundColor: '#EFE4DA',
+    alignSelf: 'flex-end',
   },
 });

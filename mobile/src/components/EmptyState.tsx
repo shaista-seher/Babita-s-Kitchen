@@ -1,9 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { colors, radius, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius, spacing } from '../theme/spacing';
 import { PrimaryButton } from './PrimaryButton';
 
 export function EmptyState({
@@ -41,13 +40,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: spacing.xl,
     paddingHorizontal: spacing.lg,
-    gap: spacing.md,
+    gap: spacing.sm,
     zIndex: 1,
   },
   iconWrap: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
@@ -55,15 +54,16 @@ const styles = StyleSheet.create({
   title: {
     color: colors.textHeading,
     fontFamily: fonts.serifBold,
-    fontSize: 28,
+    fontSize: 26,
+    lineHeight: 32,
     textAlign: 'center',
   },
   message: {
     color: colors.textMuted,
     fontFamily: fonts.body,
-    fontSize: 15,
-    lineHeight: 23,
+    fontSize: typeScale.body.size,
+    lineHeight: typeScale.body.lineHeight,
     textAlign: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: spacing.lg,
   },
 });

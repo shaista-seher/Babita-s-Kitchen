@@ -1,8 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { colors, radius } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius } from '../theme/spacing';
 
 export function VegBadge() {
   return (

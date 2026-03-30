@@ -1,9 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Toast, { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
-import { colors } from '../theme/colors';
+import { colors, radius, shadows, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius } from '../theme/spacing';
 
 const toastConfig: ToastConfig = {
   success: (props) => (
@@ -54,41 +53,43 @@ export function ToastHost() {
 const styles = StyleSheet.create({
   successContainer: {
     borderLeftWidth: 0,
-    borderRadius: radius.lg,
-    backgroundColor: colors.primaryLight,
-    minHeight: 64,
-    paddingVertical: 6,
+    borderRadius: radius.xl,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    minHeight: 68,
+    paddingVertical: spacing.xxs,
+    ...shadows.soft,
   },
   errorContainer: {
     borderLeftWidth: 0,
-    borderRadius: radius.lg,
-    backgroundColor: '#fdecea',
-    minHeight: 64,
-    paddingVertical: 6,
+    borderRadius: radius.xl,
+    backgroundColor: 'rgba(255,245,244,0.98)',
+    minHeight: 68,
+    paddingVertical: spacing.xxs,
+    ...shadows.soft,
   },
   content: {
-    paddingHorizontal: 10,
+    paddingHorizontal: spacing.xs,
   },
   title: {
     color: colors.textHeading,
     fontFamily: fonts.bodyBold,
-    fontSize: 14,
+    fontSize: typeScale.body.size,
   },
   body: {
     color: colors.textBody,
     fontFamily: fonts.body,
-    fontSize: 12,
+    fontSize: typeScale.support.size,
   },
   successAccent: {
     width: 5,
-    borderTopLeftRadius: radius.lg,
-    borderBottomLeftRadius: radius.lg,
+    borderTopLeftRadius: radius.xl,
+    borderBottomLeftRadius: radius.xl,
     backgroundColor: colors.primary,
   },
   errorAccent: {
     width: 5,
-    borderTopLeftRadius: radius.lg,
-    borderBottomLeftRadius: radius.lg,
+    borderTopLeftRadius: radius.xl,
+    borderBottomLeftRadius: radius.xl,
     backgroundColor: '#c0392b',
   },
 });

@@ -26,8 +26,11 @@ export async function openRazorpayCheckout(
   options: RazorpayOptions
 ): Promise<RazorpaySuccess> {
   try {
-    const RazorpayCheckout =
-      require('react-native-razorpay')?.default ?? require('react-native-razorpay');
+    // Keep Razorpay optional so Metro can bundle even when the native package
+    // is not installed in Expo Go or local dev environments.
+    const optionalRequire = eval('require');
+    const razorpayModule = optionalRequire('react-native-razorpay');
+    const RazorpayCheckout = razorpayModule?.default ?? razorpayModule;
     return await RazorpayCheckout.open(options);
   } catch (error) {
     throw new Error(

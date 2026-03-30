@@ -20,10 +20,8 @@ import { showSuccessToast } from '../components/ToastNotification';
 import { useCart } from '../hooks/useCart';
 import { useDish } from '../hooks/useDish';
 import { Addon } from '../shared/schema';
-import { colors } from '../theme/colors';
+import { colors, radius, shadows, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius, spacing } from '../theme/spacing';
-import { shadow } from '../theme/shadow';
 import { formatPrice } from '../utils/formatPrice';
 
 export default function DishDetailsScreen() {
@@ -51,16 +49,15 @@ export default function DishDetailsScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
-        <BackgroundBlobs />
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 130 }}
-          bounces
-        >
-          <View style={[styles.imageWrap, { height: height * 0.45 }]}>
+        <BackgroundBlobs softened />
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+          <View style={[styles.imageWrap, { height: height * 0.42 }]}>
             <Image source={{ uri: dish.imageUrl }} style={styles.image} contentFit="cover" />
-            <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-              <Feather name="chevron-left" size={22} color={colors.textHeading} />
+            <Pressable
+              style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
+              onPress={() => navigation.goBack()}
+            >
+              <Feather name="chevron-left" size={20} color={colors.textHeading} />
             </Pressable>
           </View>
 
@@ -74,12 +71,11 @@ export default function DishDetailsScreen() {
             </View>
 
             <Text style={styles.seller}>Babita&apos;s Kitchen</Text>
-            <View style={styles.divider} />
             <Text style={styles.description}>{dish.description}</Text>
 
             {dish.addons.length > 0 ? (
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Select Flavour</Text>
+                <Text style={styles.sectionLabel}>Select flavour</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.addonRow}>
                   {dish.addons.map((addon: Addon) => (
                     <CategoryPill
@@ -96,11 +92,17 @@ export default function DishDetailsScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Quantity</Text>
               <View style={styles.stepper}>
-                <Pressable style={[styles.stepperButton, styles.stepperMinus]} onPress={() => setQuantity((current) => Math.max(1, current - 1))}>
+                <Pressable
+                  style={({ pressed }) => [styles.stepperButton, styles.stepperMinus, pressed && styles.pressed]}
+                  onPress={() => setQuantity((current) => Math.max(1, current - 1))}
+                >
                   <Text style={styles.stepperMinusText}>-</Text>
                 </Pressable>
                 <Text style={styles.quantityText}>{quantity}</Text>
-                <Pressable style={[styles.stepperButton, styles.stepperPlus]} onPress={() => setQuantity((current) => current + 1)}>
+                <Pressable
+                  style={({ pressed }) => [styles.stepperButton, styles.stepperPlus, pressed && styles.pressed]}
+                  onPress={() => setQuantity((current) => current + 1)}
+                >
                   <Text style={styles.stepperPlusText}>+</Text>
                 </Pressable>
               </View>
@@ -109,9 +111,12 @@ export default function DishDetailsScreen() {
         </ScrollView>
 
         <View style={styles.bottomBar}>
-          <Text style={styles.totalPrice}>{formatPrice(unitPrice * quantity)}</Text>
+          <View>
+            <Text style={styles.bottomLabel}>Total</Text>
+            <Text style={styles.totalPrice}>{formatPrice(unitPrice * quantity)}</Text>
+          </View>
           <PrimaryButton
-            title="Add to Cart"
+            title="Add to cart"
             onPress={() => {
               addToCart(dish, quantity, unitPrice, selectedAddon);
               showSuccessToast('Added to cart', dish.name);
@@ -126,51 +131,57 @@ export default function DishDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.cream },
-  loadingSafeArea: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.cream },
-  container: { flex: 1, backgroundColor: colors.cream },
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  loadingSafeArea: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+  },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { paddingBottom: 132 },
   imageWrap: { position: 'relative' },
-  image: { width: '100%', height: '100%', backgroundColor: '#e8ddd4' },
+  image: { width: '100%', height: '100%', backgroundColor: '#E8DDD4' },
   backButton: {
     position: 'absolute',
-    top: 52,
-    left: 16,
-    width: 42,
-    height: 42,
-    borderRadius: radius.full,
+    top: 20,
+    left: spacing.screen,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.92)',
     alignItems: 'center',
     justifyContent: 'center',
-    ...shadow.soft,
+    ...shadows.soft,
   },
   bodyCard: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
+    backgroundColor: 'rgba(255,255,255,0.97)',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     marginTop: -28,
-    padding: 28,
-    ...shadow.card,
+    padding: spacing.lg,
+    gap: spacing.xs,
+    ...shadows.card,
   },
   category: {
-    fontSize: 11,
-    color: colors.primary,
+    fontSize: typeScale.label.size,
+    lineHeight: typeScale.label.lineHeight,
+    color: colors.primaryMuted,
     fontFamily: fonts.bodyBold,
-    letterSpacing: 2,
+    letterSpacing: 1.4,
     textTransform: 'uppercase',
-    marginBottom: 10,
   },
   name: {
     fontFamily: fonts.serifBold,
-    fontSize: 30,
+    fontSize: 32,
     color: colors.textHeading,
-    lineHeight: 36,
+    lineHeight: 38,
   },
   priceRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginTop: 10,
-    marginBottom: 6,
+    gap: spacing.xs,
+    marginTop: spacing.xxs,
   },
   price: {
     fontFamily: fonts.serifBold,
@@ -180,62 +191,58 @@ const styles = StyleSheet.create({
   seller: {
     color: colors.textMuted,
     fontFamily: fonts.body,
-    fontSize: 14,
-    marginBottom: 20,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(0,0,0,0.06)',
-    marginBottom: 20,
+    fontSize: typeScale.support.size,
   },
   description: {
+    marginTop: spacing.sm,
     fontFamily: fonts.body,
-    fontSize: 15,
+    fontSize: typeScale.body.size,
     color: colors.textBody,
-    lineHeight: 24,
+    lineHeight: typeScale.body.lineHeight,
   },
   section: {
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
+    gap: spacing.xs,
   },
   sectionLabel: {
     fontFamily: fonts.bodyBold,
-    fontSize: 15,
+    fontSize: 16,
     color: colors.textHeading,
-    marginBottom: 12,
   },
   addonRow: {
-    gap: 8,
+    gap: spacing.xs,
+    paddingVertical: spacing.xxs,
   },
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 18,
+    gap: spacing.md,
   },
   stepperButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepperMinus: {
-    backgroundColor: colors.primaryLight,
+    backgroundColor: colors.primarySoft,
   },
   stepperPlus: {
     backgroundColor: colors.primary,
   },
   stepperMinusText: {
     color: colors.primary,
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: fonts.bodyBold,
   },
   stepperPlusText: {
     color: colors.white,
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: fonts.bodyBold,
   },
   quantityText: {
-    width: 48,
+    width: 44,
     textAlign: 'center',
     fontSize: 20,
     fontFamily: fonts.bodyBold,
@@ -243,16 +250,20 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.white,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.06)',
+    left: spacing.screen,
+    right: spacing.screen,
+    bottom: spacing.lg,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    borderRadius: 24,
+    padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
+    ...shadows.dock,
+  },
+  bottomLabel: {
+    color: colors.textMuted,
+    fontFamily: fonts.body,
+    fontSize: typeScale.support.size,
   },
   totalPrice: {
     fontFamily: fonts.serifBold,
@@ -261,6 +272,9 @@ const styles = StyleSheet.create({
   },
   bottomButton: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: spacing.md,
+  },
+  pressed: {
+    opacity: 0.75,
   },
 });

@@ -6,9 +6,8 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { colors } from '../theme/colors';
+import { colors, radius, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius, spacing } from '../theme/spacing';
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function CategoryPill({
@@ -59,9 +58,9 @@ export function CategoryPill({
 const styles = StyleSheet.create({
   base: {
     borderRadius: radius.full,
-    paddingHorizontal: 18,
-    paddingVertical: 9,
-    borderWidth: 1.5,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
   },
   selected: {
     borderColor: colors.primary,
@@ -70,16 +69,16 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0,0,0,0.10)',
   },
   pressed: {
-    opacity: 0.85,
+    opacity: 0.75,
   },
   text: {
-    fontSize: 13,
+    fontSize: typeScale.support.size,
   },
   selectedText: {
     color: colors.white,
     fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    letterSpacing: 0.5,
+    fontSize: typeScale.support.size,
+    letterSpacing: 0.2,
   },
   unselectedText: {
     color: colors.textHeading,

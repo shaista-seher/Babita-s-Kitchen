@@ -16,10 +16,8 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { colors } from '../theme/colors';
+import { colors, radius, shadows, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius, spacing } from '../theme/spacing';
-import { shadow } from '../theme/shadow';
 
 type Props = Omit<PressableProps, 'style'> & {
   title: string;
@@ -50,75 +48,82 @@ export function PrimaryButton({
   }));
 
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View style={[animatedStyle, fullWidth && styles.wrapperFullWidth]}>
       <Pressable
-      disabled={disabled || loading}
-      onPressIn={(event) => {
-        scale.value = withSpring(0.97);
-        onPressIn?.(event);
-      }}
-      onPressOut={(event) => {
-        scale.value = withSpring(1);
-        onPressOut?.(event);
-      }}
-      style={({ pressed }) => [
-        styles.button,
-        fullWidth && styles.fullWidth,
-        variant === 'ghost' ? styles.ghost : styles.solid,
-        (disabled || loading) && styles.disabled,
-        pressed && !disabled && !loading && styles.pressed,
-        style,
-      ]}
-      {...props}
-    >
-      {loading ? (
-        <View style={styles.row}>
-          <ActivityIndicator color={colors.white} />
-          <Text style={[styles.label, variant === 'ghost' && styles.ghostLabel, textStyle]}>{title}</Text>
-        </View>
-      ) : (
-        <View style={styles.row}>
-          {icon ? (
-            <Feather
-              name={icon}
-              size={16}
-              color={variant === 'ghost' ? colors.primary : colors.white}
-            />
-          ) : null}
-          <Text style={[styles.label, variant === 'ghost' && styles.ghostLabel, textStyle]}>{title}</Text>
-        </View>
-      )}
+        disabled={disabled || loading}
+        onPressIn={(event) => {
+          scale.value = withSpring(0.97);
+          onPressIn?.(event);
+        }}
+        onPressOut={(event) => {
+          scale.value = withSpring(1);
+          onPressOut?.(event);
+        }}
+        style={({ pressed }) => [
+          styles.button,
+          fullWidth && styles.fullWidth,
+          variant === 'ghost' ? styles.ghost : styles.solid,
+          (disabled || loading) && styles.disabled,
+          pressed && !disabled && !loading && styles.pressed,
+          style,
+        ]}
+        {...props}
+      >
+        {loading ? (
+          <View style={styles.row}>
+            <ActivityIndicator color={variant === 'ghost' ? colors.primary : colors.white} />
+            <Text style={[styles.label, variant === 'ghost' && styles.ghostLabel, textStyle]}>
+              {title}
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.row}>
+            {icon ? (
+              <Feather
+                name={icon}
+                size={16}
+                color={variant === 'ghost' ? colors.primary : colors.white}
+              />
+            ) : null}
+            <Text style={[styles.label, variant === 'ghost' && styles.ghostLabel, textStyle]}>
+              {title}
+            </Text>
+          </View>
+        )}
       </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapperFullWidth: {
+    alignSelf: 'stretch',
+  },
   button: {
-    minHeight: 54,
+    minHeight: 48,
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: spacing.sm + 5,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
   },
   fullWidth: {
     width: '100%',
   },
   solid: {
     backgroundColor: colors.primary,
-    ...shadow.card,
+    ...shadows.soft,
   },
   ghost: {
-    backgroundColor: colors.white,
-    borderWidth: 1.5,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
     borderColor: colors.primary,
   },
   disabled: {
     opacity: 0.6,
   },
   pressed: {
-    backgroundColor: colors.primaryDark,
+    opacity: 0.75,
   },
   row: {
     flexDirection: 'row',
@@ -128,8 +133,8 @@ const styles = StyleSheet.create({
   label: {
     color: colors.white,
     fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    letterSpacing: 1.8,
+    fontSize: typeScale.body.size,
+    letterSpacing: 0.3,
     textTransform: 'uppercase',
   },
   ghostLabel: {

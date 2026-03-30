@@ -1,9 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { colors, radius, shadows, spacing } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius } from '../theme/spacing';
-import { shadow } from '../theme/shadow';
 import { formatPrice } from '../utils/formatPrice';
 
 export function PriceBadge({ price }: { price: number }) {
@@ -18,9 +16,9 @@ const styles = StyleSheet.create({
   badge: {
     backgroundColor: colors.primary,
     borderRadius: radius.full,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    ...shadow.card,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs + 2,
+    ...shadows.soft,
   },
   text: {
     color: colors.white,

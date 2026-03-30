@@ -6,32 +6,23 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useWindowDimensions,
   View,
+  useWindowDimensions,
 } from 'react-native';
-import Animated, {
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from 'react-native-reanimated';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { BackgroundBlobs } from '../components/BackgroundBlobs';
 import { CategoryPill } from '../components/CategoryPill';
 import { DishCard } from '../components/DishCard';
 import { EmptyState } from '../components/EmptyState';
+import { SectionHeader } from '../components/SectionHeader';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { showSuccessToast } from '../components/ToastNotification';
 import { useCart } from '../hooks/useCart';
 import { useDishes } from '../hooks/useDishes';
-import { colors } from '../theme/colors';
+import { colors, radius, shadows, spacing, typeScale } from '../constants/theme';
 import { fonts } from '../theme/fonts';
-import { radius, spacing } from '../theme/spacing';
-import { shadow } from '../theme/shadow';
-
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<any>);
 
 export default function MenuScreen() {
   const navigation = useNavigation<any>();
@@ -39,7 +30,6 @@ export default function MenuScreen() {
   const { width } = useWindowDimensions();
   const { addToCart } = useCart();
   const { data: dishes = [], isLoading, refetch, isRefetching } = useDishes();
-  const scrollY = useSharedValue(0);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(route.params?.category ?? 'All');
 
@@ -50,12 +40,13 @@ export default function MenuScreen() {
   }, [route.params?.category]);
 
   const categories = useMemo(
-    () => ['All', ...Array.from(new Set(dishes.map((dish) => dish.category)))],
+    () => ['All', ...Array.from(new Set(dishes.map((dish) => dish.category).filter(Boolean)))],
     [dishes]
   );
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
+
     return dishes.filter((dish) => {
       const matchesCategory = selectedCategory === 'All' || dish.category === selectedCategory;
       const haystack = `${dish.name} ${dish.description}`.toLowerCase();
@@ -63,41 +54,36 @@ export default function MenuScreen() {
     });
   }, [dishes, search, selectedCategory]);
 
-  const heroStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(scrollY.value, [0, 120], [1, 0.97]) }],
-    opacity: interpolate(scrollY.value, [0, 160], [1, 0.9]),
-  }));
-
-  const onScroll = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
-
-  const cardWidth = Math.max((width - 24) / 2 - 10, 150);
+  const cardWidth = Math.max((width - spacing.screen * 2 - spacing.sm) / 2, 156);
 
   const header = (
     <View style={styles.headerWrap}>
-      <Animated.View style={[styles.heroCard, heroStyle]}>
-        <Text style={styles.heroTitle}>Our Feminine Creations</Text>
+      <View style={styles.heroCard}>
+        <Text style={styles.heroEyebrow}>From the pantry</Text>
+        <Text style={styles.heroTitle}>Pickles, papad, and handmade comfort</Text>
         <Text style={styles.heroSubtitle}>
-          Signature recipes crafted with the strength and creativity of women-led excellence
+          Browse slow-crafted favourites and filter by what you feel like taking home today.
         </Text>
-      </Animated.View>
+      </View>
 
       <View style={styles.searchWrap}>
         <Feather name="search" size={18} color={colors.textMuted} />
         <TextInput
           value={search}
           onChangeText={setSearch}
-          placeholder="Search dishes, pickles, papad..."
-          placeholderTextColor="#c0b8b0"
+          placeholder="Search pickles, papad, flavours..."
+          placeholderTextColor={colors.textMuted}
           style={styles.searchInput}
         />
         {search.length > 0 ? (
           <Feather name="x" size={18} color={colors.textMuted} onPress={() => setSearch('')} />
         ) : null}
       </View>
+
+      <SectionHeader
+        title="Browse the menu"
+        subtitle="Category labels stay quiet so the dishes and photography carry the mood."
+      />
 
       <ScrollView
         horizontal
@@ -113,6 +99,8 @@ export default function MenuScreen() {
           />
         ))}
       </ScrollView>
+
+      <DecorativeDivider />
     </View>
   );
 
@@ -121,23 +109,21 @@ export default function MenuScreen() {
       <View style={styles.container}>
         <BackgroundBlobs />
         {isLoading ? (
-          <ScrollView contentContainerStyle={styles.loadingContent} bounces>
+          <ScrollView contentContainerStyle={styles.loadingContent} showsVerticalScrollIndicator={false}>
             {header}
             <View style={styles.loadingGrid}>
               {Array.from({ length: 4 }).map((_, index) => (
-                <View key={index} style={[styles.loadingCardWrap, { width: cardWidth }]}>
+                <View key={index} style={{ width: cardWidth }}>
                   <SkeletonCard />
                 </View>
               ))}
             </View>
           </ScrollView>
         ) : (
-          <AnimatedFlatList
+          <FlatList
             data={filtered}
             keyExtractor={(item) => item.id}
             numColumns={2}
-            onScroll={onScroll}
-            scrollEventThrottle={16}
             refreshControl={
               <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />
             }
@@ -146,27 +132,29 @@ export default function MenuScreen() {
             columnWrapperStyle={styles.columnWrap}
             ListHeaderComponent={header}
             renderItem={({ item }) => (
-              <DishCard
-                dish={item}
-                onPress={() => navigation.navigate('DishDetails', { id: item.id })}
-                onAdd={() => {
-                  addToCart(item, 1);
-                  showSuccessToast('Added to cart', item.name);
-                }}
-                style={{ width: cardWidth, flex: 0, margin: 0 }}
-              />
+              <View style={{ width: cardWidth }}>
+                <DishCard
+                  dish={item}
+                  onPress={() => navigation.navigate('DishDetails', { id: item.id })}
+                  onAdd={() => {
+                    addToCart(item, 1);
+                    showSuccessToast('Added to cart', item.name);
+                  }}
+                />
+              </View>
             )}
-            ItemSeparatorComponent={() => <View style={{ height: 4 }} />}
+            ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
             ListEmptyComponent={
               <EmptyState
                 icon="search"
                 title="Nothing found"
-                message="Try a different search or browse all categories."
-                actionLabel="Clear Search"
+                message="Try a different search, or return to all categories for the full kitchen spread."
+                actionLabel="Clear search"
                 onAction={() => {
                   setSearch('');
                   setSelectedCategory('All');
                 }}
+                actionVariant="solid"
               />
             }
           />
@@ -176,74 +164,106 @@ export default function MenuScreen() {
   );
 }
 
+function DecorativeDivider() {
+  return (
+    <View style={styles.decorativeDots}>
+      <View style={styles.decorativeDot} />
+      <View style={styles.decorativeDot} />
+      <View style={styles.decorativeDot} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.cream },
-  container: { flex: 1, backgroundColor: colors.cream },
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   headerWrap: {
-    paddingTop: 6,
-    paddingBottom: 14,
-    gap: 14,
+    paddingTop: spacing.md,
+    paddingHorizontal: spacing.screen,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
   },
   heroCard: {
-    backgroundColor: colors.white,
-    borderRadius: 24,
-    marginHorizontal: 16,
-    padding: 28,
-    ...shadow.card,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xxl,
+    padding: spacing.lg,
+    ...shadows.card,
+  },
+  heroEyebrow: {
+    color: colors.primaryMuted,
+    fontFamily: fonts.bodyBold,
+    fontSize: typeScale.label.size,
+    lineHeight: typeScale.label.lineHeight,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
   heroTitle: {
+    marginTop: spacing.xs,
+    color: colors.textHeading,
     fontFamily: fonts.serifBold,
     fontSize: 32,
-    color: colors.textHeading,
     lineHeight: 38,
   },
   heroSubtitle: {
-    marginTop: 8,
-    fontFamily: fonts.body,
-    fontSize: 15,
+    marginTop: spacing.xs,
     color: colors.textMuted,
-    lineHeight: 22,
+    fontFamily: fonts.body,
+    fontSize: typeScale.body.size,
+    lineHeight: typeScale.body.lineHeight,
   },
   searchWrap: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radius.full,
-    marginHorizontal: 16,
-    paddingHorizontal: 18,
-    minHeight: 52,
+    minHeight: 48,
+    paddingHorizontal: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    ...shadow.soft,
+    ...shadows.soft,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: spacing.xs,
     color: colors.textHeading,
     fontFamily: fonts.body,
-    fontSize: 15,
+    fontSize: typeScale.body.size,
   },
   pillsRow: {
-    paddingHorizontal: 16,
-    gap: 8,
-    paddingVertical: 10,
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
   },
   listContent: {
-    padding: 10,
-    paddingBottom: spacing.xxl,
+    paddingHorizontal: spacing.screen,
+    paddingBottom: spacing.dockClearance,
   },
   columnWrap: {
-    gap: 4,
     justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   loadingContent: {
-    paddingBottom: spacing.xxl,
+    paddingBottom: spacing.dockClearance,
   },
   loadingGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 4,
-    paddingHorizontal: 10,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.screen,
   },
-  loadingCardWrap: {
-    marginBottom: 4,
+  decorativeDots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginVertical: spacing.lg,
+  },
+  decorativeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.primaryDust,
   },
 });
